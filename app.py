@@ -345,7 +345,10 @@ st.caption("Bạn có thể đổi tên người chơi ở bên dưới.")
 with st.expander("✏️ ĐỔI TÊN NHÂN VẬT", expanded=False):
     if st.session_state.players:
         player_options = {
-            f'{p["name"]} (ID {p["id"]})': p["id"]
+            player_options = {
+    "{} (ID {})".format(p["name"], p["id"]): p["id"]
+    for p in st.session_state.players
+}
             for p in st.session_state.players
         }
 
