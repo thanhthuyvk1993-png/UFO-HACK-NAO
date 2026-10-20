@@ -877,6 +877,5 @@ render();
 """
 
 components.html(GAME, height=950, scrolling=True)
-"""
 
 components.html(GAME, height=950, scrolling=True)
