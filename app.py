@@ -1,970 +1,1378 @@
 import streamlit as st
 import streamlit.components.v1 as components
-import random
-import html
 
 st.set_page_config(
     page_title="UFO HACK NÃO",
     page_icon="🛸",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="collapsed"
 )
 
-# ==================================================
-# GIAO DIỆN
-# ==================================================
+GAME_HTML = r"""
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-st.markdown("""
 <style>
-#MainMenu, footer, header {
-    visibility: hidden;
+* {
+    box-sizing: border-box;
 }
 
-.stApp {
-    background: linear-gradient(145deg, #050817, #101a38, #030611);
-    color: #FFD700;
+body {
+    margin: 0;
+    background: #080d1b;
+    color: #ffe66d;
+    font-family: Arial, sans-serif;
 }
 
-.block-container {
-    max-width: 1500px;
-    padding: 10px 12px 20px;
+button, input {
+    font-family: inherit;
 }
 
-.game-title {
-    text-align: center;
-    color: #FFD700 !important;
-    font-size: clamp(28px, 4vw, 44px);
-    font-weight: 1000;
-    text-shadow: 0 0 12px #B8860B;
-}
-
-.game-subtitle {
-    text-align: center;
-    color: #FFE566 !important;
-    font-size: 14px;
-    font-weight: 900;
-    margin-bottom: 14px;
-}
-
-h1, h2, h3, h4, h5, h6 {
-    color: #FFD700 !important;
-    font-weight: 900 !important;
-    text-shadow: 0 1px 3px #000;
-}
-
-p, label,
-[data-testid="stWidgetLabel"],
-[data-testid="stCaptionContainer"],
-[data-testid="stCaptionContainer"] p {
-    color: #FFE566 !important;
-    font-weight: 800 !important;
-}
-
-[data-testid="stRadio"] label,
-[data-testid="stRadio"] label p {
-    color: #FFD700 !important;
-    font-size: 16px !important;
-    font-weight: 900 !important;
-}
-
-.stTextInput input,
-.stTextArea textarea,
-[data-testid="stNumberInput"] input {
-    color: #FFD700 !important;
-    background: #101a32 !important;
-    font-weight: 800 !important;
-    border: 1px solid #FFD700 !important;
-}
-
-.stButton button {
+.game {
     width: 100%;
-    min-height: 42px;
-    color: #FFD700 !important;
-    background: #17213d !important;
-    border: 1px solid #FFD700 !important;
-    border-radius: 9px;
-    font-size: 14px !important;
-    font-weight: 900 !important;
-}
-
-.stButton button:hover {
-    background: #493b0b !important;
-    border-color: #FFF1A8 !important;
-}
-
-.stat-box {
-    background: #101a32;
-    border: 1px solid #B8860B;
-    border-radius: 10px;
-    padding: 8px 3px;
-    text-align: center;
-    color: #FFD700;
-    font-size: 12px;
-    font-weight: 900;
-}
-
-.stat-number {
-    color: #FFD700;
-    font-size: 23px;
-    font-weight: 1000;
-}
-
-.game-panel {
-    background: linear-gradient(145deg, #121d3d, #080d20);
-    border: 2px solid #8B7500;
-    border-radius: 16px;
+    max-width: 1400px;
+    margin: auto;
     padding: 12px;
 }
 
-[data-testid="stAlert"] p {
-    color: #FFD700 !important;
-    font-weight: 900 !important;
+.header {
+    text-align: center;
+    padding: 12px 5px;
+    border: 2px solid #ffcf33;
+    border-radius: 15px;
+    background: linear-gradient(120deg, #101735, #24104b);
+    box-shadow: 0 0 18px #ffcf3340;
 }
 
-hr {
-    border-color: #8B7500;
+.header h1 {
+    margin: 4px;
+    font-size: clamp(27px, 5vw, 44px);
+    color: #ffe66d;
+    text-shadow: 0 0 15px #ffae00;
 }
 
-@media(max-width: 600px) {
-    .block-container {
-        padding: 4px;
-    }
-
-    .game-panel {
-        padding: 7px;
-    }
-
-    .stat-box {
-        font-size: 9px;
-    }
-
-    .stat-number {
-        font-size: 18px;
-    }
-}
-</style>
-""", unsafe_allow_html=True)
-
-
-# ==================================================
-# TRẠNG THÁI GAME
-# ==================================================
-
-if "players" not in st.session_state:
-    st.session_state.players = [
-        {
-            "id": i,
-            "name": f"Người {i + 1}",
-            "alive": True,
-        }
-        for i in range(20)
-    ]
-
-defaults = {
-    "score": 0,
-    "round": 1,
-    "answered": [],
-    "victim_id": None,
-    "notice": "🛸 UFO đang bay quanh Trái Đất!",
-    "music_volume": 0.2,
+.header p {
+    margin: 7px;
+    color: #c9d8ff;
 }
 
-for key, value in defaults.items():
-    if key not in st.session_state:
-        st.session_state[key] = value
+.stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin: 12px 0;
+}
 
-players = st.session_state.players
+.stat {
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+    padding: 12px 5px;
+    border: 1px solid #5c70b9;
+    border-radius: 12px;
+    background: #111a36;
+}
 
-for i, player in enumerate(players):
-    player.setdefault("id", i)
-    player.setdefault("name", f"Người {i + 1}")
-    player.setdefault("alive", True)
+.stat b {
+    display: block;
+    font-size: 22px;
+    color: #ffe66d;
+    margin-bottom: 4px;
+}
 
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #101832;
+    border: 1px solid #334779;
+    border-radius: 12px;
+}
 
-# ==================================================
-# NGÂN HÀNG CÂU ĐỐ
-# ==================================================
+.control {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+    min-width: 150px;
+}
 
-riddles = [
-    {
-        "q": "Cái gì càng lấy đi thì càng lớn?",
-        "options": ["Cái hố", "Cái cây", "Dòng sông"],
-        "answer": "Cái hố",
-    },
-    {
-        "q": "Tháng nào có 28 ngày?",
-        "options": ["Tháng 2", "Tất cả các tháng", "Tháng 6"],
-        "answer": "Tất cả các tháng",
-    },
-    {
-        "q": "Cái gì có cổ nhưng không có đầu?",
-        "options": ["Cái chai", "Cái bàn", "Cái ghế"],
-        "answer": "Cái chai",
-    },
-    {
-        "q": "Vượt qua người đứng thứ hai thì bạn đứng thứ mấy?",
-        "options": ["Thứ nhất", "Thứ hai", "Thứ ba"],
-        "answer": "Thứ hai",
-    },
-    {
-        "q": "Cái gì có răng nhưng không cắn?",
-        "options": ["Cái lược", "Con chó", "Cá mập"],
-        "answer": "Cái lược",
-    },
-    {
-        "q": "Bạn lấy 2 quả trong 5 quả táo. Bạn có mấy quả?",
-        "options": ["2", "3", "5"],
-        "answer": "2",
-    },
-    {
-        "q": "Cái gì càng lau càng ướt?",
-        "options": ["Cái khăn", "Cái bàn", "Cái ghế"],
-        "answer": "Cái khăn",
-    },
-    {
-        "q": "Cái gì luôn đến nhưng không bao giờ là hôm nay?",
-        "options": ["Ngày mai", "Hôm qua", "Buổi sáng"],
-        "answer": "Ngày mai",
-    },
-    {
-        "q": "3 con mèo bắt 3 con chuột trong 3 phút. 100 con mèo bắt 100 con chuột trong bao lâu?",
-        "options": ["3 phút", "100 phút", "30 phút"],
-        "answer": "3 phút",
-    },
-    {
-        "q": "Cái gì có nhiều phím nhưng không mở được cửa?",
-        "options": ["Đàn piano", "Chùm chìa khóa", "Cánh cửa"],
-        "answer": "Đàn piano",
-    },
-    {
-        "q": "Một năm có bao nhiêu tháng có ít nhất 28 ngày?",
-        "options": ["1 tháng", "6 tháng", "12 tháng"],
-        "answer": "12 tháng",
-    },
-    {
-        "q": "Cái gì có mặt nhưng không có mũi?",
-        "options": ["Đồng hồ", "Cái áo", "Cái cây"],
-        "answer": "Đồng hồ",
-    },
-]
+label {
+    font-size: 13px;
+    color: #cbd7ff;
+}
 
+input[type="number"],
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #6478bd;
+    border-radius: 8px;
+    background: #080e20;
+    color: white;
+    outline: none;
+}
 
-# ==================================================
-# TIÊU ĐỀ VÀ THỐNG KÊ
-# ==================================================
+input[type="range"] {
+    width: 100%;
+    accent-color: #ffd43b;
+}
 
-st.markdown('<div class="game-panel">', unsafe_allow_html=True)
+button {
+    padding: 10px 14px;
+    border: 1px solid #ffdf5d;
+    border-radius: 9px;
+    color: #fff4ba;
+    background: #38234e;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
 
-st.markdown(
-    '<div class="game-title">🛸 UFO HACK NÃO 👽</div>',
-    unsafe_allow_html=True,
-)
+button:hover {
+    transform: translateY(-1px);
+    background: #68418a;
+}
 
-st.markdown(
-    '<div class="game-subtitle">'
-    'THỬ THÁCH TRÍ TUỆ · UFO BẮT CÓC · SINH TỒN NGOÀI HÀNH TINH'
-    '</div>',
-    unsafe_allow_html=True,
-)
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
-alive = [p for p in players if p["alive"]]
-captured_count = len(players) - len(alive)
+.primary {
+    background: linear-gradient(120deg, #f7b928, #ff7a18);
+    color: #160d20;
+    border: none;
+}
 
-stat_cols = st.columns(4)
+.primary:hover {
+    background: #ffdb65;
+}
 
-stats = [
-    (len(players), "👥 NGƯỜI CHƠI"),
-    (len(alive), "🟢 CÒN LẠI"),
-    (captured_count, "🛸 ĐÃ BẮT"),
-    (st.session_state.score, "🏆 ĐIỂM"),
-]
+#scene {
+    position: relative;
+    height: 560px;
+    overflow: hidden;
+    border: 2px solid #5e78c6;
+    border-radius: 15px;
+    background: #10162e;
+    isolation: isolate;
+}
 
-for col, (number, label) in zip(stat_cols, stats):
-    with col:
-        st.markdown(
-            f'<div class="stat-box">'
-            f'<div class="stat-number">{number}</div>'
-            f'{label}</div>',
-            unsafe_allow_html=True,
-        )
+.sky {
+    position: absolute;
+    inset: 0 0 42% 0;
+    background:
+        radial-gradient(circle at 20% 20%, #ffffff 0 1px, transparent 2px),
+        radial-gradient(circle at 65% 17%, #ffffff 0 1px, transparent 2px),
+        radial-gradient(circle at 83% 30%, #a9d4ff 0 1px, transparent 2px),
+        linear-gradient(#080e29, #26365d);
+    background-size: 100px 80px, 130px 110px, 160px 120px, auto;
+}
 
+.moon {
+    position: absolute;
+    top: 25px;
+    right: 11%;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #fff2b0;
+    box-shadow: 0 0 35px #ffe9a0;
+}
 
-# ==================================================
-# BỐ CỤC CHÍNH
-# ==================================================
+.buildings {
+    position: absolute;
+    inset: 90px 0 38% 0;
+    display: flex;
+    align-items: end;
+    gap: 5px;
+    padding: 0 6px;
+}
 
-left, right = st.columns([1.7, 1], gap="medium")
+.building {
+    position: relative;
+    flex: 1;
+    height: var(--height);
+    min-width: 35px;
+    background: linear-gradient(90deg, #17213d, #263656);
+    border: 1px solid #40547a;
+}
 
+.windows {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+    padding: 10px 7px;
+}
 
-# ==================================================
-# SÂN CHƠI VÀ NHÂN VẬT
-# ==================================================
+.window {
+    height: 13px;
+    background: #ffda69;
+    box-shadow: 0 0 8px #ffbb3c55;
+    opacity: 0.85;
+}
 
-with left:
-    st.markdown("### 🌌 SÂN CHƠI UFO")
+.road {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 43%;
+    background: linear-gradient(#424957, #222936);
+    border-top: 9px solid #858b9a;
+}
 
-    crowd = []
+.sidewalk {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 56%;
+    height: 6%;
+    background: repeating-linear-gradient(
+        90deg,
+        #858b9a 0 60px,
+        #636b7c 60px 63px
+    );
+}
 
-    for i, player in enumerate(players):
-        if not player["alive"]:
-            continue
+.road-line {
+    position: absolute;
+    top: 80%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: repeating-linear-gradient(
+        90deg,
+        #ffe59b 0 45px,
+        transparent 45px 85px
+    );
+    opacity: 0.8;
+}
 
-        row = i // 10
-        col = i % 10
+.lamp {
+    position: absolute;
+    top: 20%;
+    width: 5px;
+    height: 40%;
+    background: #66738c;
+}
 
-        x = 5 + col * 10 + random.uniform(-1, 1)
-        y = 4 + row * 7.5
+.lamp::before {
+    content: "";
+    position: absolute;
+    width: 34px;
+    height: 5px;
+    top: 0;
+    left: 0;
+    background: #66738c;
+}
 
-        name = html.escape(player["name"], quote=True)
+.lamp::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 25px;
+    width: 13px;
+    height: 10px;
+    background: #ffe6a0;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #ffe6a0;
+}
 
-        crowd.append(f"""
-        <div class="person"
-             style="left:{x:.1f}%;bottom:{y:.1f}%"
-             title="{name}">
-            <div class="head"><span class="eyes">••</span></div>
-            <div class="arms"><i></i><i></i></div>
-            <div class="body"></div>
-            <div class="legs"><i></i><i></i></div>
-            <div class="person-name">{name}</div>
-        </div>
-        """)
+#ufo {
+    position: absolute;
+    top: 8%;
+    left: 12%;
+    width: 100px;
+    height: 70px;
+    z-index: 20;
+    text-align: center;
+    font-size: 55px;
+    filter: drop-shadow(0 0 10px #6deaff);
+    transition: left 2.4s ease, top 1.4s ease;
+    pointer-events: none;
+}
 
-    victim = next(
-        (
-            p for p in players
-            if p["id"] == st.session_state.victim_id
-        ),
-        None,
-    )
+.beam {
+    position: absolute;
+    display: none;
+    top: 65px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 260px;
+    background: linear-gradient(
+        to bottom,
+        #6df9ff99,
+        #6df9ff20,
+        transparent
+    );
+    clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
+    animation: beamPulse 0.6s infinite alternate;
+}
 
-    victim_html = ""
+@keyframes beamPulse {
+    from { opacity: 0.5; }
+    to { opacity: 1; }
+}
 
-    if victim:
-        victim_name = html.escape(victim["name"], quote=True)
+.person {
+    position: absolute;
+    z-index: 10;
+    width: 34px;
+    height: 100px;
+    transform-origin: center bottom;
+    cursor: default;
+    transition: opacity 0.7s, filter 0.7s;
+}
 
-        victim_html = f"""
-        <div class="beam"></div>
-        <div class="abducted">
-            <div class="head big-head">
-                <span class="eyes">••</span>
-            </div>
-            <div class="body big-body"></div>
-            <div class="person-name">{victim_name}</div>
-        </div>
-        """
+.person .head {
+    position: absolute;
+    left: 10px;
+    top: 0;
+    width: 17px;
+    height: 19px;
+    border-radius: 50%;
+    background: var(--skin);
+    border: 1px solid #47312a;
+}
 
-    scene_template = r"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <style>
-    * {box-sizing:border-box}
+.person .hair {
+    position: absolute;
+    z-index: 2;
+    left: 9px;
+    top: -2px;
+    width: 19px;
+    height: 8px;
+    border-radius: 9px 9px 4px 4px;
+    background: var(--hair);
+}
 
-    body {
-        margin:0;
-        background:#050817;
-        font-family:Arial,sans-serif;
-        color:white;
+.person .body {
+    position: absolute;
+    left: 7px;
+    top: 19px;
+    width: 23px;
+    height: 38px;
+    border-radius: 7px 7px 3px 3px;
+    background: var(--shirt);
+    border: 1px solid #ffffff40;
+}
+
+.person .arm {
+    position: absolute;
+    top: 23px;
+    width: 7px;
+    height: 31px;
+    border-radius: 6px;
+    background: var(--skin);
+    transform-origin: top center;
+}
+
+.person .arm.left {
+    left: 4px;
+    animation: armLeft 0.45s infinite alternate;
+}
+
+.person .arm.right {
+    right: 3px;
+    animation: armRight 0.45s infinite alternate;
+}
+
+.person .leg {
+    position: absolute;
+    top: 53px;
+    width: 9px;
+    height: 37px;
+    border-radius: 5px;
+    background: var(--pants);
+    transform-origin: top center;
+}
+
+.person .leg.left {
+    left: 9px;
+    animation: legLeft 0.4s infinite alternate;
+}
+
+.person .leg.right {
+    left: 20px;
+    animation: legRight 0.4s infinite alternate;
+}
+
+.person .shoe {
+    position: absolute;
+    bottom: 5px;
+    width: 13px;
+    height: 6px;
+    border-radius: 5px;
+    background: #111;
+}
+
+.person .shoe.left {
+    left: 5px;
+}
+
+.person .shoe.right {
+    left: 17px;
+}
+
+@keyframes legLeft {
+    from { transform: rotate(-22deg); }
+    to { transform: rotate(22deg); }
+}
+
+@keyframes legRight {
+    from { transform: rotate(22deg); }
+    to { transform: rotate(-22deg); }
+}
+
+@keyframes armLeft {
+    from { transform: rotate(20deg); }
+    to { transform: rotate(-20deg); }
+}
+
+@keyframes armRight {
+    from { transform: rotate(-20deg); }
+    to { transform: rotate(20deg); }
+}
+
+.person.captured {
+    animation: abduct 2.3s forwards ease-in;
+    pointer-events: none;
+}
+
+.person.captured .leg,
+.person.captured .arm {
+    animation-play-state: paused;
+}
+
+@keyframes abduct {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        filter: brightness(2);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-230px) scale(0.2);
+    }
+}
+
+.person .nameTag {
+    position: absolute;
+    top: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 10px;
+    white-space: nowrap;
+    text-shadow: 1px 1px 3px black;
+    pointer-events: none;
+}
+
+#message {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    width: max-content;
+    max-width: 90%;
+    padding: 9px 15px;
+    border-radius: 20px;
+    background: #080d1ddd;
+    border: 1px solid #ffe66d;
+    color: #ffe66d;
+    text-align: center;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+#quiz {
+    display: none;
+    position: absolute;
+    z-index: 50;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(500px, 92%);
+    padding: 20px;
+    background: #10142af5;
+    border: 2px solid #ffe66d;
+    border-radius: 17px;
+    box-shadow: 0 0 30px #55eaff77;
+    color: #fff;
+    text-align: center;
+}
+
+#quiz h2 {
+    margin: 0 0 10px;
+    color: #ffe66d;
+}
+
+#question {
+    font-size: 17px;
+    line-height: 1.5;
+    margin: 14px 0;
+}
+
+.answers {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+}
+
+.answers button {
+    min-height: 48px;
+    background: #202d50;
+    border-color: #657fc2;
+    color: white;
+}
+
+.answers button:hover {
+    background: #465b8c;
+}
+
+#quizResult {
+    margin-top: 12px;
+    min-height: 25px;
+    font-weight: bold;
+    color: #ffe66d;
+}
+
+.footer {
+    padding: 12px 3px;
+    text-align: center;
+    color: #aab9e5;
+    font-size: 12px;
+}
+
+@media (max-width: 600px) {
+    #scene {
+        height: 480px;
     }
 
-    .scene {
-        position:relative;
-        width:100%;
-        height:440px;
-        overflow:hidden;
-        border:2px solid #b8860b;
-        border-radius:14px;
-        background:
-        radial-gradient(circle at 15% 15%,#fff 1px,transparent 2px),
-        radial-gradient(circle at 80% 25%,#fff 1px,transparent 2px),
-        linear-gradient(#101b3b,#07101f 78%,#164451);
-        background-size:70px 70px,100px 100px,auto;
-    }
-
-    .ufo {
-        position:absolute;
-        z-index:100;
-        top:15px;
-        left:50%;
-        width:140px;
-        height:75px;
-        transform:translateX(-50%);
-        animation:hover 3s ease-in-out infinite;
-    }
-
-    .dome {
-        position:absolute;
-        left:45px;
-        top:0;
-        width:50px;
-        height:36px;
-        border:3px solid #fde68a;
-        border-radius:50% 50% 20% 20%;
-        background:linear-gradient(130deg,#fef3c7,#a78bfa);
-        box-shadow:0 0 18px #facc15;
-    }
-
-    .disk {
-        position:absolute;
-        top:26px;
-        width:140px;
-        height:38px;
-        border:3px solid #facc15;
-        border-radius:50%;
-        background:linear-gradient(#fef3c7,#a16207,#272653);
-        box-shadow:0 0 20px #facc15;
-    }
-
-    .lights {
-        position:absolute;
-        top:41px;
-        left:15px;
-        width:110px;
-        display:flex;
-        justify-content:space-around;
-    }
-
-    .lights i {
-        width:7px;
-        height:7px;
-        border-radius:50%;
-        background:#fff1a8;
-        box-shadow:0 0 8px #facc15;
-        animation:blink 1s infinite alternate;
+    #ufo {
+        font-size: 42px;
+        width: 75px;
     }
 
     .person {
-        position:absolute;
-        width:10%;
-        height:80px;
-        min-width:28px;
-        transform:translateX(-50%);
-        text-align:center;
-        z-index:10;
+        transform: scale(0.85);
+        transform-origin: bottom center;
     }
 
-    .head {
-        position:relative;
-        width:27px;
-        height:26px;
-        margin:auto;
-        border:2px solid #bbf7d0;
-        border-radius:48%;
-        background:linear-gradient(#86efac,#22c55e);
-        box-shadow:0 0 7px #4ade80;
-        z-index:2;
+    #quiz {
+        padding: 13px;
     }
 
-    .eyes {
-        position:absolute;
-        top:5px;
-        left:5px;
-        width:14px;
-        color:#06111c;
-        font-size:12px;
-        font-weight:900;
-        letter-spacing:2px;
+    #question {
+        font-size: 15px;
     }
+}
+</style>
+</head>
 
-    .arms {
-        position:absolute;
-        top:29px;
-        left:50%;
-        width:38px;
-        transform:translateX(-50%);
-        display:flex;
-        justify-content:space-between;
-    }
+<body>
+<div class="game">
 
-    .arms i {
-        display:block;
-        width:7px;
-        height:20px;
-        border-radius:5px;
-        background:#a78bfa;
-        border:1px solid #ddd6fe;
-    }
-
-    .body {
-        position:relative;
-        z-index:2;
-        width:21px;
-        height:26px;
-        margin:-1px auto 0;
-        border:2px solid #facc15;
-        border-radius:7px;
-        background:linear-gradient(90deg,#7c3aed,#a78bfa,#5b21b6);
-    }
-
-    .legs {
-        width:17px;
-        height:12px;
-        display:flex;
-        justify-content:space-between;
-        margin:-1px auto 0;
-    }
-
-    .legs i {
-        display:block;
-        width:7px;
-        height:12px;
-        border-radius:3px;
-        background:#cbd5e1;
-    }
-
-    .person-name {
-        position:relative;
-        z-index:5;
-        margin:2px auto 0;
-        max-width:80px;
-        overflow:hidden;
-        text-overflow:ellipsis;
-        white-space:nowrap;
-        color:#ffe566;
-        background:#07101fee;
-        border:1px solid #b8860b;
-        border-radius:4px;
-        padding:2px;
-        font-size:10px;
-        font-weight:900;
-    }
-
-    .beam {
-        position:absolute;
-        z-index:50;
-        left:35%;
-        top:55px;
-        width:30%;
-        height:350px;
-        pointer-events:none;
-        clip-path:polygon(42% 0,58% 0,100% 100%,0 100%);
-        background:linear-gradient(
-            to bottom,
-            #fef08a99,
-            #facc1533,
-            transparent
-        );
-        animation:blink .7s infinite alternate;
-    }
-
-    .abducted {
-        position:absolute;
-        z-index:80;
-        top:55px;
-        left:50%;
-        width:100px;
-        text-align:center;
-        transform:translateX(-50%);
-        animation:abduct 3s ease-in-out forwards;
-    }
-
-    .big-head {
-        width:34px;
-        height:33px;
-    }
-
-    .big-body {
-        width:28px;
-        height:34px;
-    }
-
-    .ground {
-        position:absolute;
-        bottom:0;
-        width:100%;
-        height:10px;
-        background:#164e63;
-        border-top:2px solid #facc15;
-    }
-
-    @keyframes hover {
-        50% {margin-top:-7px}
-    }
-
-    @keyframes blink {
-        from {opacity:.4}
-        to {opacity:1}
-    }
-
-    @keyframes abduct {
-        0% {
-            top:330px;
-            opacity:0;
-            transform:translateX(-50%) scale(.8);
-        }
-        15% {opacity:1}
-        75% {
-            top:100px;
-            opacity:1;
-            transform:translateX(-50%) scale(1);
-        }
-        100% {
-            top:35px;
-            opacity:0;
-            transform:translateX(-50%) scale(.5);
-        }
-    }
-
-    @media(max-width:600px) {
-        .scene {height:380px}
-        .person {height:65px}
-        .head {width:22px;height:22px}
-        .eyes {top:4px;left:3px;font-size:10px}
-        .body {width:18px;height:22px}
-        .arms {top:25px;width:32px}
-        .arms i {height:16px}
-        .legs i {height:10px}
-        .person-name {font-size:8px;max-width:52px}
-    }
-    </style>
-    </head>
-    <body>
-    <div class="scene">
-        <div class="ufo">
-            <div class="dome"></div>
-            <div class="disk"></div>
-            <div class="lights">
-                <i></i><i></i><i></i><i></i><i></i>
-            </div>
-        </div>
-        __CROWD__
-        __VICTIM__
-        <div class="ground"></div>
+    <div class="header">
+        <h1>🛸 UFO HACK NÃO 👽</h1>
+        <p>UFO đang săn người ngoài phố! Hãy giải câu đố để giành điểm!</p>
     </div>
-    </body>
-    </html>
-    """
 
-    scene = scene_template.replace("__CROWD__", "".join(crowd))
-    scene = scene.replace("__VICTIM__", victim_html)
+    <div class="stats">
+        <div class="stat">
+            <b id="score">0</b>
+            Điểm
+        </div>
+        <div class="stat">
+            <b id="saved">0</b>
+            Đã giải cứu
+        </div>
+        <div class="stat">
+            <b id="remaining">12</b>
+            Người còn lại
+        </div>
+        <div class="stat">
+            <b id="round">0</b>
+            Lượt UFO bắt
+        </div>
+    </div>
 
-    components.html(scene, height=450, scrolling=False)
+    <div class="controls">
+        <div class="control">
+            <label for="peopleCount">Số người trong thành phố (1–100)</label>
+            <input id="peopleCount" type="number" min="1" max="100" value="12">
+        </div>
 
-    if st.button("🚨 UFO BẮT NGƯỜI NGẪU NHIÊN", type="primary"):
-        candidates = [p for p in players if p["alive"]]
+        <button id="applyPeople">👥 Áp dụng số người</button>
 
-        if candidates:
-            target = random.choice(candidates)
-            target["alive"] = False
-            st.session_state.victim_id = target["id"]
-            st.session_state.notice = f"🛸 UFO đã bắt {target['name']}!"
-        else:
-            st.session_state.notice = "Tất cả người chơi đã bị bắt!"
+        <div class="control">
+            <label for="renameSelect">Chọn người để đổi tên</label>
+            <select id="renameSelect"
+                style="padding:10px;border-radius:8px;background:#080e20;color:white;border:1px solid #6478bd">
+            </select>
+        </div>
 
-        st.rerun()
+        <div class="control">
+            <label for="newName">Tên mới</label>
+            <input id="newName" type="text" maxlength="18" placeholder="Nhập tên...">
+        </div>
 
-    st.info(st.session_state.notice)
+        <button id="renameButton">✏️ Đổi tên</button>
+        <button id="startButton" class="primary">🔊 BẮT ĐẦU GAME</button>
+        <button id="resetButton">🔄 Chơi lại</button>
 
+        <div class="control" style="max-width:180px">
+            <label for="volume">Âm lượng nhạc</label>
+            <input id="volume" type="range" min="0" max="100" value="45">
+            <span id="volumeLabel">45%</span>
+        </div>
+    </div>
 
-# ==================================================
-# CÂU ĐỐ
-# ==================================================
+    <div id="scene">
+        <div class="sky"></div>
+        <div class="moon"></div>
+        <div class="buildings" id="buildings"></div>
 
-with right:
-    st.markdown("### 🧠 CÂU ĐỐ HACK NÃO")
+        <div class="lamp" style="left:8%"></div>
+        <div class="lamp" style="left:76%"></div>
 
-    riddle = riddles[
-        (st.session_state.round - 1) % len(riddles)
-    ]
+        <div class="road"></div>
+        <div class="sidewalk"></div>
+        <div class="road-line"></div>
 
-    st.caption(f"CÂU SỐ {st.session_state.round}")
-    st.markdown(f"**{riddle['q']}**")
+        <div id="ufo">
+            🛸
+            <div class="beam" id="beam"></div>
+        </div>
 
-    selected_answer = st.radio(
-        "CHỌN ĐÁP ÁN:",
-        riddle["options"],
-        key=f"answer_{st.session_state.round}",
-    )
+        <div id="message">🌃 Đêm xuống... UFO đang tuần tra thành phố!</div>
 
-    if st.button("✅ KIỂM TRA ĐÁP ÁN"):
-        if st.session_state.round in st.session_state.answered:
-            st.warning("Bạn đã trả lời câu này rồi.")
-        else:
-            st.session_state.answered.append(
-                st.session_state.round
-            )
+        <div id="peopleLayer"></div>
 
-            if selected_answer == riddle["answer"]:
-                st.session_state.score += 1
-                st.success("🎉 CHÍNH XÁC!")
-            else:
-                st.error(
-                    f"ĐÁP ÁN ĐÚNG: {riddle['answer']}"
-                )
+        <div id="quiz">
+            <h2>🧠 HACK NÃO!</h2>
+            <div id="targetText">UFO đã bắt được một người!</div>
+            <div id="question"></div>
+            <div class="answers" id="answers"></div>
+            <div id="quizResult"></div>
+        </div>
+    </div>
 
-    if st.button("➡️ CÂU TIẾP THEO"):
-        st.session_state.round += 1
-        st.rerun()
+    <div class="footer">
+        Mẹo: Bấm “BẮT ĐẦU GAME” để bật âm thanh. Người và UFO sẽ tự động di chuyển.
+        Trả lời câu hỏi để ghi điểm!
+    </div>
+</div>
 
-    st.markdown("---")
+<script>
+const $ = id => document.getElementById(id);
 
+const peopleLayer = $("peopleLayer");
+const ufo = $("ufo");
+const beam = $("beam");
+const quiz = $("quiz");
+const message = $("message");
 
-# ==================================================
-# CHỈNH SỐ LƯỢNG NGƯỜI CHƠI
-# ==================================================
+let people = [];
+let score = 0;
+let saved = 0;
+let round = 0;
+let currentTarget = null;
+let gameStarted = false;
+let quizOpen = false;
+let nextAbductionTimer = null;
+let animationFrame = null;
 
-with right:
-    st.markdown("### 👥 QUẢN LÝ NGƯỜI CHƠI")
+const shirts = [
+    "#e74c3c", "#3498db", "#2ecc71", "#f1c40f",
+    "#9b59b6", "#ff8c42", "#ff69b4", "#4ecdc4"
+];
 
-    st.caption(
-        f"Số lượng hiện tại: {len(players)}/100 người"
-    )
+const pantsColors = [
+    "#202d46", "#353535", "#293b59", "#493b35"
+];
 
-    target_count = st.number_input(
-        "🎮 CHỌN SỐ LƯỢNG NGƯỜI CHƠI",
-        min_value=1,
-        max_value=100,
-        value=len(players),
-        step=1,
-        key="target_count",
-    )
+const skinColors = [
+    "#f4c7a1", "#d99a6c", "#b9754c", "#f0d1b0"
+];
 
-    if st.button("🔢 ÁP DỤNG SỐ LƯỢNG"):
-        target_count = int(st.session_state.target_count)
+const hairColors = [
+    "#211914", "#563a25", "#292929", "#a56a32"
+];
 
-        while len(players) < target_count:
-            new_id = max(
-                (p["id"] for p in players),
-                default=-1,
-            ) + 1
+const questions = [
+    {
+        q: "Cái gì càng lấy đi thì càng lớn?",
+        a: ["Cái túi", "Cái hố", "Ngọn núi", "Cái cây"],
+        correct: 1,
+        explain: "Chính xác! Càng đào đất đi, cái hố càng lớn."
+    },
+    {
+        q: "Một năm có bao nhiêu tháng có 28 ngày?",
+        a: ["1 tháng", "2 tháng", "6 tháng", "12 tháng"],
+        correct: 3,
+        explain: "Đúng rồi! Tháng nào cũng có ít nhất 28 ngày."
+    },
+    {
+        q: "Có 5 quả táo, bạn lấy đi 2 quả. Bạn có mấy quả?",
+        a: ["3 quả", "2 quả", "5 quả", "7 quả"],
+        correct: 1,
+        explain: "Đúng! Bạn lấy 2 quả nên bạn có 2 quả."
+    },
+    {
+        q: "Cái gì có răng nhưng không biết nhai?",
+        a: ["Con cá", "Cái lược", "Con chó", "Cái bát"],
+        correct: 1,
+        explain: "Chính xác! Đó là cái lược."
+    },
+    {
+        q: "Bạn vượt qua người đứng thứ hai trong cuộc đua. Bạn đứng thứ mấy?",
+        a: ["Thứ nhất", "Thứ hai", "Thứ ba", "Thứ tư"],
+        correct: 1,
+        explain: "Đúng! Bạn chiếm vị trí thứ hai của người đó."
+    },
+    {
+        q: "Cái gì luôn đi tới nhưng không bao giờ đến nơi?",
+        a: ["Ngày mai", "Xe buýt", "Con mèo", "Cơn mưa"],
+        correct: 0,
+        explain: "Đúng! Ngày mai đến thì lại trở thành hôm nay."
+    },
+    {
+        q: "Có 3 con gà đẻ 3 quả trứng trong 3 ngày. 6 con gà đẻ 6 quả trứng trong bao lâu?",
+        a: ["1 ngày", "2 ngày", "3 ngày", "6 ngày"],
+        correct: 2,
+        explain: "Chính xác! Mỗi con gà đẻ 1 quả trong 3 ngày."
+    },
+    {
+        q: "Cái gì có cổ nhưng không có đầu?",
+        a: ["Con người", "Cái chai", "Con ngựa", "Cái bàn"],
+        correct: 1,
+        explain: "Đúng rồi! Đó là cái chai."
+    },
+    {
+        q: "Một bác sĩ cho bạn 3 viên thuốc, cứ 30 phút uống 1 viên. Bao lâu thì uống hết?",
+        a: ["30 phút", "60 phút", "90 phút", "120 phút"],
+        correct: 1,
+        explain: "Đúng! Uống viên đầu ngay, viên hai sau 30 phút, viên ba sau 60 phút."
+    },
+    {
+        q: "Cái gì có mặt và hai kim nhưng không có tay?",
+        a: ["Robot", "Đồng hồ", "Con người", "Cái quạt"],
+        correct: 1,
+        explain: "Chính xác! Đó là đồng hồ."
+    },
+    {
+        q: "Một căn phòng có 4 góc. Mỗi góc có một con mèo. Có tất cả mấy con mèo?",
+        a: ["4", "8", "12", "16"],
+        correct: 0,
+        explain: "Đúng! Mỗi góc một con mèo, tổng cộng 4 con."
+    },
+    {
+        q: "Cái gì có thể đi vòng quanh thế giới mà vẫn nằm nguyên một chỗ?",
+        a: ["Máy bay", "Con tem", "Mặt trời", "Con tàu"],
+        correct: 1,
+        explain: "Đúng! Con tem nằm ở góc phong bì."
+    },
+    {
+        q: "Nếu bạn có một que diêm và vào phòng tối có nến, đèn dầu, bếp củi, bạn thắp gì trước?",
+        a: ["Nến", "Đèn dầu", "Bếp củi", "Que diêm"],
+        correct: 3,
+        explain: "Chính xác! Phải thắp que diêm trước."
+    },
+    {
+        q: "Cái gì càng khô thì càng ướt?",
+        a: ["Cái khăn", "Cát", "Đá", "Tờ giấy"],
+        correct: 0,
+        explain: "Đúng! Khăn lau càng khô thì càng hút nước và trở nên ướt."
+    },
+    {
+        q: "Bạn có thể cầm thứ gì bằng tay trái nhưng không thể cầm bằng tay phải?",
+        a: ["Cái cốc", "Khuỷu tay phải", "Quyển sách", "Cái bút"],
+        correct: 1,
+        explain: "Đúng! Bạn không thể cầm khuỷu tay phải bằng chính tay phải."
+    }
+];
 
-            players.append({
-                "id": new_id,
-                "name": f"Người {new_id + 1}",
-                "alive": True,
-            })
+// Tạo nhà cửa và cửa sổ.
+function createBuildings() {
+    const container = $("buildings");
+    container.innerHTML = "";
 
-        while len(players) > target_count:
-            players.pop()
+    const heights = [65, 90, 75, 100, 68, 86, 72, 94];
 
-        if not any(
-            p["id"] == st.session_state.victim_id
-            for p in players
-        ):
-            st.session_state.victim_id = None
+    for (let i = 0; i < heights.length; i++) {
+        const building = document.createElement("div");
+        building.className = "building";
+        building.style.setProperty("--height", heights[i] + "%");
 
-        st.session_state.notice = (
-            f"🎮 Đã cập nhật thành {target_count} người chơi!"
-        )
+        const windows = document.createElement("div");
+        windows.className = "windows";
 
-        st.rerun()
+        for (let j = 0; j < 12; j++) {
+            const win = document.createElement("div");
+            win.className = "window";
 
-    st.markdown("---")
+            if (Math.random() > 0.25) {
+                win.style.opacity = "0.9";
+            } else {
+                win.style.opacity = "0.15";
+            }
 
-    selected_id = st.selectbox(
-        "✏️ CHỌN NHÂN VẬT ĐỂ ĐỔI TÊN",
-        [p["id"] for p in players],
-        format_func=lambda pid: next(
-            f"{p['name']} (ID {pid})"
-            for p in players if p["id"] == pid
-        ),
-    )
-
-    new_name = st.text_input(
-        "TÊN NHÂN VẬT MỚI",
-        max_chars=24,
-    )
-
-    if st.button("💛 LƯU TÊN"):
-        if new_name.strip():
-            target = next(
-                p for p in players
-                if p["id"] == selected_id
-            )
-
-            target["name"] = new_name.strip()
-            st.rerun()
-        else:
-            st.warning("Hãy nhập tên trước nhé.")
-
-    st.markdown("---")
-
-
-# ==================================================
-# NHẠC NỀN
-# ==================================================
-
-with right:
-    st.markdown("### 🔊 NHẠC UFO")
-
-    volume = st.slider(
-        "ÂM LƯỢNG",
-        min_value=0.0,
-        max_value=0.6,
-        value=float(st.session_state.music_volume),
-        step=0.05,
-        key="volume_control",
-    )
-
-    st.session_state.music_volume = volume
-
-    music_html = r"""
-    <html>
-    <body style="
-        margin:0;
-        background:#101a32;
-        color:#FFD700;
-        text-align:center;
-        font-family:Arial;
-        padding:8px">
-
-    <button id="play" style="
-        padding:10px;
-        background:#493b0b;
-        color:#FFD700;
-        border:1px solid #FFD700;
-        border-radius:8px;
-        font-weight:bold">
-        ▶ PHÁT NHẠC
-    </button>
-
-    <button id="stop" style="
-        padding:10px;
-        background:#17213d;
-        color:#FFD700;
-        border:1px solid #FFD700;
-        border-radius:8px;
-        font-weight:bold">
-        ■ DỪNG NHẠC
-    </button>
-
-    <script>
-    let ctx = null;
-    let timer = null;
-
-    function stopMusic() {
-        if (timer !== null) {
-            clearInterval(timer);
-            timer = null;
+            windows.appendChild(win);
         }
 
-        if (ctx) {
-            ctx.close().catch(() => {});
-            ctx = null;
-        }
+        building.appendChild(windows);
+        container.appendChild(building);
+    }
+}
+
+function createPerson(index) {
+    const el = document.createElement("div");
+    el.className = "person";
+
+    const person = {
+        id: index + 1,
+        name: "Người " + (index + 1),
+        el: el,
+        x: Math.random() * 90,
+        y: 57 + Math.random() * 23,
+        speed: 0.012 + Math.random() * 0.022,
+        direction: Math.random() > 0.5 ? 1 : -1,
+        alive: true,
+        captured: false
+    };
+
+    const shirt = shirts[Math.floor(Math.random() * shirts.length)];
+    const pants = pantsColors[Math.floor(Math.random() * pantsColors.length)];
+    const skin = skinColors[Math.floor(Math.random() * skinColors.length)];
+    const hair = hairColors[Math.floor(Math.random() * hairColors.length)];
+
+    el.style.setProperty("--shirt", shirt);
+    el.style.setProperty("--pants", pants);
+    el.style.setProperty("--skin", skin);
+    el.style.setProperty("--hair", hair);
+
+    el.innerHTML = `
+        <div class="hair"></div>
+        <div class="head"></div>
+        <div class="body"></div>
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+        <div class="leg left"></div>
+        <div class="leg right"></div>
+        <div class="shoe left"></div>
+        <div class="shoe right"></div>
+        <div class="nameTag"></div>
+    `;
+
+    peopleLayer.appendChild(el);
+
+    el.querySelector(".nameTag").textContent = person.name;
+    el.style.left = person.x + "%";
+    el.style.top = person.y + "%";
+    el.style.zIndex = String(Math.floor(person.y));
+
+    person.el.style.transform =
+        "scale(" + (0.7 + (person.y - 57) / 23 * 0.45) + ")";
+
+    people.push(person);
+    return person;
+}
+
+function updateNameTag(person) {
+    person.el.querySelector(".nameTag").textContent = person.name;
+}
+
+function refreshRenameSelect() {
+    const select = $("renameSelect");
+    const previous = select.value;
+
+    select.innerHTML = "";
+
+    people.forEach(person => {
+        if (!person.alive) return;
+
+        const option = document.createElement("option");
+        option.value = person.id;
+        option.textContent = person.name;
+        select.appendChild(option);
+    });
+
+    if ([...select.options].some(o => o.value === previous)) {
+        select.value = previous;
+    }
+}
+
+function updateStats() {
+    $("score").textContent = score;
+    $("saved").textContent = saved;
+    $("remaining").textContent = people.filter(p => p.alive).length;
+    $("round").textContent = round;
+}
+
+function setMessage(text) {
+    message.textContent = text;
+}
+
+function createCity(count) {
+    peopleLayer.innerHTML = "";
+    people = [];
+
+    for (let i = 0; i < count; i++) {
+        createPerson(i);
     }
 
-    async function playMusic() {
-        stopMusic();
+    score = 0;
+    saved = 0;
+    round = 0;
+    currentTarget = null;
+    quizOpen = false;
 
-        const AC = window.AudioContext || window.webkitAudioContext;
+    quiz.style.display = "none";
+    beam.style.display = "none";
 
-        if (!AC) {
-            alert("Trình duyệt không hỗ trợ âm thanh.");
-            return;
+    refreshRenameSelect();
+    updateStats();
+
+    setMessage("🌃 Đêm xuống... UFO đang tuần tra thành phố!");
+
+    if (gameStarted) {
+        scheduleAbduction();
+    }
+}
+
+function moveUFO() {
+    const x = 4 + Math.random() * 78;
+    const y = 4 + Math.random() * 15;
+
+    ufo.style.left = x + "%";
+    ufo.style.top = y + "%";
+}
+
+function animatePeople() {
+    if (!document.body.isConnected) return;
+
+    people.forEach(person => {
+        if (!person.alive || person.captured) return;
+
+        person.x += person.speed * person.direction;
+
+        if (person.x > 94) {
+            person.x = 94;
+            person.direction = -1;
         }
 
-        ctx = new AC();
-
-        if (ctx.state === "suspended") {
-            await ctx.resume();
+        if (person.x < 1) {
+            person.x = 1;
+            person.direction = 1;
         }
 
-        const master = ctx.createGain();
-        master.gain.value = __VOLUME__;
-        master.connect(ctx.destination);
+        person.el.style.left = person.x + "%";
+        person.el.style.transform =
+            "scale(" + (0.7 + (person.y - 57) / 23 * 0.45) + ")";
 
-        const drone = ctx.createOscillator();
-        const droneGain = ctx.createGain();
+        person.el.style.zIndex = String(Math.floor(person.y));
 
-        drone.type = "sawtooth";
-        drone.frequency.value = 48;
-        droneGain.gain.value = 0.025;
+        if (person.direction < 0) {
+            person.el.style.filter = "none";
+        }
+    });
 
-        drone.connect(droneGain);
-        droneGain.connect(master);
-        drone.start();
+    animationFrame = requestAnimationFrame(animatePeople);
+}
 
-        let n = 0;
+function scheduleAbduction() {
+    clearTimeout(nextAbductionTimer);
 
-        timer = setInterval(() => {
-            if (!ctx) return;
+    if (!gameStarted || quizOpen) return;
 
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
+    const living = people.filter(p => p.alive && !p.captured);
 
-            osc.type = "triangle";
-            osc.frequency.value = n % 2 ? 65 : 82;
-
-            gain.gain.setValueAtTime(0.001, ctx.currentTime);
-            gain.gain.linearRampToValueAtTime(
-                0.035, ctx.currentTime + 0.05
-            );
-            gain.gain.linearRampToValueAtTime(
-                0.001, ctx.currentTime + 0.3
-            );
-
-            osc.connect(gain);
-            gain.connect(master);
-
-            osc.start();
-            osc.stop(ctx.currentTime + 0.35);
-
-            n++;
-        }, 600);
+    if (living.length === 0) {
+        setMessage("👽 UFO đã bắt hết mọi người! Bấm CHƠI LẠI để tiếp tục.");
+        gameStarted = false;
+        $("startButton").textContent = "🔊 BẮT ĐẦU GAME";
+        return;
     }
 
-    document.getElementById("play").onclick = playMusic;
-    document.getElementById("stop").onclick = stopMusic;
-    </script>
-    </body>
-    </html>
-    """
+    const delay = 5500 + Math.random() * 3500;
 
-    music_html = music_html.replace(
-        "__VOLUME__",
-        str(float(volume)),
-    )
+    nextAbductionTimer = setTimeout(() => {
+        if (!gameStarted || quizOpen) return;
+        beginAbduction();
+    }, delay);
+}
 
-    components.html(
-        music_html,
-        height=75,
-        scrolling=False,
-    )
+function beginAbduction() {
+    const living = people.filter(p => p.alive && !p.captured);
 
-    st.caption(
-        "Bấm PHÁT NHẠC để nghe. "
-        "Nên giữ âm lượng vừa phải để bảo vệ thính giác."
-    )
+    if (living.length === 0) {
+        scheduleAbduction();
+        return;
+    }
 
+    currentTarget = living[Math.floor(Math.random() * living.length)];
+    round++;
 
-# ==================================================
-# DANH SÁCH VÀ CHƠI LẠI
-# ==================================================
+    const target = currentTarget;
+    const sceneWidth = $("scene").clientWidth;
 
-with right:
-    if st.button("🔄 CHƠI LẠI TỪ ĐẦU"):
-        for player in players:
-            player["alive"] = True
+    const targetX = Math.max(
+        0,
+        Math.min(85, target.x - 3)
+    );
 
-        st.session_state.victim_id = None
-        st.session_state.round = 1
-        st.session_state.score = 0
-        st.session_state.answered = []
-        st.session_state.notice = "🛸 UFO đã quay lại!"
+    ufo.style.left = targetX + "%";
+    ufo.style.top = "8%";
 
-        st.rerun()
+    beam.style.display = "block";
 
-    with st.expander("📋 DANH SÁCH NGƯỜI CHƠI"):
-        for player in players:
-            status = (
-                "🛸 ĐÃ BỊ BẮT"
-                if not player["alive"]
-                else "🟢 CÒN LẠI"
-            )
+    setMessage("🛸 UFO đang khóa mục tiêu: " + target.name + "!");
 
-            st.markdown(
-                f"**{player['name']}** — {status}"
-            )
+    playSFX(660, 0.3);
 
+    setTimeout(() => {
+        if (!target.alive) return;
+
+        target.captured = true;
+        target.el.classList.add("captured");
+
+        setTimeout(() => {
+            target.alive = false;
+            target.captured = false;
+
+            target.el.style.display = "none";
+
+            beam.style.display = "none";
+
+            updateStats();
+            refreshRenameSelect();
+
+            showQuestion(target);
+        }, 1200);
+
+    }, 900);
+}
+
+function showQuestion(target) {
+    quizOpen = true;
+    gameStarted = false;
+
+    clearTimeout(nextAbductionTimer);
+
+    const question = questions[
+        Math.floor(Math.random() * questions.length)
+    ];
+
+    $("targetText").textContent =
+        "🛸 UFO đã bắt " + target.name + "! Trả lời để giành điểm.";
+
+    $("question").textContent = question.q;
+    $("quizResult").textContent = "";
+
+    const answerBox = $("answers");
+    answerBox.innerHTML = "";
+
+    question.a.forEach((answer, index) => {
+        const button = document.createElement("button");
+        button.textContent = answer;
+
+        button.addEventListener("click", () => {
+            [...answerBox.querySelectorAll("button")].forEach(b => {
+                b.disabled = true;
+            });
+
+            if (index === question.correct) {
+                score += 10;
+                saved += 1;
+
+                $("quizResult").textContent =
+                    "🎉 Chính xác! +10 điểm. " + question.explain;
+
+                playSFX(880, 0.5);
+            } else {
+                $("quizResult").textContent =
+                    "❌ Chưa đúng! " + question.explain;
+
+                playSFX(220, 0.4);
+            }
+
+            updateStats();
+
+            const continueButton = document.createElement("button");
+            continueButton.className = "primary";
+            continueButton.textContent = "▶ TIẾP TỤC";
+            continueButton.style.gridColumn = "1 / -1";
+
+            continueButton.addEventListener("click", () => {
+                quiz.style.display = "none";
+                quizOpen = false;
+
+                if (people.every(p => !p.alive)) {
+                    setMessage(
+                        "👽 UFO đã bắt hết mọi người! Bấm CHƠI LẠI để chơi tiếp."
+                    );
+                    gameStarted = false;
+                    $("startButton").textContent = "🔊 BẮT ĐẦU GAME";
+                    return;
+                }
+
+                gameStarted = true;
+                $("startButton").textContent = "⏸ TẠM DỪNG GAME";
+                setMessage("🌃 UFO tiếp tục tuần tra... Hãy cảnh giác!");
+
+                scheduleAbduction();
+            });
+
+            answerBox.appendChild(continueButton);
+        });
+
+        answerBox.appendChild(button);
+    });
+
+    quiz.style.display = "block";
+}
+
+function resetGame() {
+    clearTimeout(nextAbductionTimer);
+
+    gameStarted = false;
+    quizOpen = false;
+    currentTarget = null;
+
+    $("startButton").textContent = "🔊 BẮT ĐẦU GAME";
+
+    const raw = parseInt($("peopleCount").value, 10);
+    const count = Math.max(1, Math.min(100, Number.isFinite(raw) ? raw : 12));
+
+    $("peopleCount").value = count;
+
+    createCity(count);
+    moveUFO();
+
+    if (gameStarted) {
+        scheduleAbduction();
+    }
+}
+
+// Âm thanh điện tử tự tạo bằng Web Audio API.
+let audioContext = null;
+let masterGain = null;
+let musicTimer = null;
+let noteIndex = 0;
+
+function setVolume() {
+    const value = Number($("volume").value);
+    $("volumeLabel").textContent = value + "%";
+
+    if (masterGain && audioContext) {
+        masterGain.gain.setTargetAtTime(
+            value / 100 * 0.45,
+            audioContext.currentTime,
+            0.08
+        );
+    }
+}
+
+function initAudio() {
+    if (audioContext) {
+        if (audioContext.state === "suspended") {
+            audioContext.resume();
+        }
+        return;
+    }
+
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioCtx) {
+        setMessage("Trình duyệt này chưa hỗ trợ âm thanh Web Audio.");
+        return;
+    }
+
+    audioContext = new AudioCtx();
+
+    masterGain = audioContext.createGain();
+    masterGain.gain.value = Number($("volume").value) / 100 * 0.45;
+    masterGain.connect(audioContext.destination);
+
+    startMusic();
+}
+
+function tone(frequency, duration, type = "sawtooth", volume = 0.15) {
+    if (!audioContext || !masterGain) return;
+
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    oscillator.type = type;
+    oscillator.frequency.value = frequency;
+
+    gain.gain.setValueAtTime(volume, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        audioContext.currentTime + duration
+    );
+
+    oscillator.connect(gain);
+    gain.connect(masterGain);
+
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + duration);
+}
+
+function startMusic() {
+    if (!audioContext) return;
+
+    clearInterval(musicTimer);
+
+    const melody = [
+        110, 165, 220, 165,
+        130, 196, 261, 196,
+        98, 147, 196, 147,
+        123, 185, 247, 185
+    ];
+
+    musicTimer = setInterval(() => {
+        if (!audioContext || audioContext.state !== "running") return;
+
+        const freq = melody[noteIndex % melody.length];
+
+        tone(freq, 0.25, "sawtooth", 0.13);
+        tone(freq * 2, 0.15, "square", 0.035);
+
+        if (noteIndex % 4 === 0) {
+            tone(55, 0.32, "triangle", 0.12);
+        }
+
+        noteIndex++;
+    }, 260);
+}
+
+function playSFX(frequency = 600, duration = 0.3) {
+    if (!audioContext) return;
+
+    tone(frequency, duration, "square", 0.18);
+    tone(frequency * 1.5, duration * 0.7, "triangle", 0.1);
+}
+
+$("startButton").addEventListener("click", () => {
+    initAudio();
+
+    if (quizOpen) {
+        setMessage("🧠 Hãy trả lời câu hỏi trước khi tiếp tục!");
+        return;
+    }
+
+    if (gameStarted) {
+        gameStarted = false;
+        clearTimeout(nextAbductionTimer);
+        $("startButton").textContent = "▶ TIẾP TỤC GAME";
+        setMessage("⏸ Game đang tạm dừng.");
+    } else {
+        const living = people.filter(p => p.alive);
+
+        if (living.length === 0) {
+            resetGame();
+        }
+
+        gameStarted = true;
+        $("startButton").textContent = "⏸ TẠM DỪNG GAME";
+        setMessage("🛸 UFO đã xuất hiện! Hãy sẵn sàng hack não!");
+        scheduleAbduction();
+    }
+});
+
+$("applyPeople").addEventListener("click", () => {
+    resetGame();
+});
+
+$("resetButton").addEventListener("click", () => {
+    resetGame();
+});
+
+$("renameButton").addEventListener("click", () => {
+    const id = Number($("renameSelect").value);
+    const newName = $("newName").value.trim();
+
+    if (!newName) {
+        setMessage("✏️ Hãy nhập tên mới trước nhé!");
+        return;
+    }
+
+    const person = people.find(p => p.id === id && p.alive);
+
+    if (!person) {
+        setMessage("Người này không còn ở trên phố!");
+        return;
+    }
+
+    person.name = newName.slice(0, 18);
+    updateNameTag(person);
+    refreshRenameSelect();
+
+    $("renameSelect").value = String(person.id);
+    $("newName").value = "";
+
+    setMessage("✨ Đã đổi tên thành " + person.name + "!");
+});
+
+$("volume").addEventListener("input", setVolume);
+
+createBuildings();
+createCity(12);
+moveUFO();
+animatePeople();
+setVolume();
+
+// UFO bay tuần tra kể cả trước khi người chơi bấm bắt đầu.
+setInterval(() => {
+    if (!gameStarted || quizOpen) {
+        moveUFO();
+    }
+}, 4500);
+</script>
+</body>
+</html>
+"""
 
 st.markdown(
-    '<div style="text-align:center;color:#FFD700;'
-    'font-weight:900;padding:10px">'
-    '🛸 UFO HACK NÃO · CHÚC BẠN CHƠI VUI! 👽'
-    '</div>',
-    unsafe_allow_html=True,
+    """
+    <style>
+    .stApp {
+        background: #080d1b;
+    }
+    [data-testid="stHeader"] {
+        background: transparent;
+    }
+    h1 {
+        color: #ffe66d !important;
+        text-align: center;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
 )
 
-st.markdown("</div>", unsafe_allow_html=True)
+st.title("🛸 UFO HACK NÃO")
+st.caption("Thành phố về đêm — UFO tự động săn người — câu đố xuất hiện ngay trong game.")
+
+components.html(
+    GAME_HTML,
+    height=1050,
+    scrolling=True
+)
+"""
+
+st.components.v1.html(GAME_HTML, height=1050, scrolling=True)
