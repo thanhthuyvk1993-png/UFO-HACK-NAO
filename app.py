@@ -1,1229 +1,777 @@
+import random
+import time
+import html
 import streamlit as st
 import streamlit.components.v1 as components
 
+# ==================================================
+# UFO HACK NÃO
+# ==================================================
+
 st.set_page_config(
-    page_title="UFO HACK NÃO 🛸",
+    page_title="UFO HACK NÃO",
     page_icon="🛸",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
+# ==================================================
+# GIAO DIỆN
+# ==================================================
+
 st.markdown("""
 <style>
-    html, body, [data-testid="stAppViewContainer"] {
-        background: #100c2b;
-        color: white;
-    }
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;900&display=swap');
 
-    [data-testid="stHeader"] {
-        background: transparent;
-    }
+html, body, [class*="css"] {
+    font-family: 'Be Vietnam Pro', sans-serif;
+}
 
-    .block-container {
-        max-width: 1400px;
-        padding: 1rem 1rem 0.5rem;
-    }
+.stApp {
+    background: radial-gradient(
+        ellipse at top,
+        #243b80 0%,
+        #10132f 55%,
+        #080b1c 100%
+    );
+    color: white;
+}
 
-    h1 {
-        text-align: center;
-        color: #ffe66d;
-        font-weight: 900;
-    }
+.block-container {
+    max-width: 1200px;
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+}
 
-    .stMarkdown, label {
-        color: white !important;
-    }
+h1, h2, h3, p, label {
+    color: white !important;
+}
 
-    div[data-testid="stNumberInput"] input {
-        text-align: center;
-    }
+.ufo-title {
+    text-align: center;
+    font-size: clamp(30px, 5vw, 55px);
+    font-weight: 900;
+    color: #a9f7ff;
+    text-shadow: 0 0 12px #00d9ff, 0 0 30px #8657ff;
+}
 
-    footer {
-        visibility: hidden;
-    }
+.ufo-subtitle {
+    text-align: center;
+    color: #e3dcff;
+    margin-bottom: 22px;
+}
+
+div.stButton > button {
+    width: 100%;
+    min-height: 48px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ff45c8, #7957ff);
+    color: white;
+    font-weight: 900;
+    font-size: 16px;
+}
+
+div.stButton > button:hover {
+    color: white;
+    box-shadow: 0 0 20px #b45cff;
+}
+
+.panel {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 16px;
+}
+
+.result {
+    text-align: center;
+    padding: 22px 12px;
+    background: linear-gradient(135deg, #fc43c5, #765cff);
+    border-radius: 20px;
+    color: white;
+    font-size: clamp(20px, 3vw, 28px);
+    font-weight: 900;
+    overflow-wrap: anywhere;
+    box-shadow: 0 0 28px rgba(218, 75, 255, 0.4);
+}
+
+div[data-testid="stTextInput"] input {
+    border-radius: 10px;
+}
+
+footer {
+    visibility: hidden;
+}
 </style>
 """, unsafe_allow_html=True)
 
+# ==================================================
+# DỮ LIỆU
+# ==================================================
+
+DEFAULT_NAMES = [
+    "Thành Thỏ", "Minh Huy", "Phương Mai", "Tuấn Minh",
+    "Quỳnh Anh", "Hải", "Mạnh", "Trúc Mai",
+    "Huy Khánh", "Đồng An"
+]
+
+CHARACTERS = ["🐰", "😎", "👑", "🧙", "💖", "👽", "🐸", "🦊"]
+
+RIDDLES = {
+    "Dễ": [
+        {
+            "q": "Cái gì có nhiều răng nhưng không cắn được?",
+            "a": "Cái lược",
+            "hint": "Dùng để chải tóc."
+        },
+        {
+            "q": "Càng lấy đi thì nó càng lớn. Là cái gì?",
+            "a": "Cái hố",
+            "hint": "Thường xuất hiện khi đào đất."
+        },
+        {
+            "q": "Cái gì có cổ nhưng không có đầu?",
+            "a": "Cái chai",
+            "hint": "Có thể đựng nước."
+        }
+    ],
+    "Trung bình": [
+        {
+            "q": "Một năm có bao nhiêu tháng có 28 ngày?",
+            "a": "12 tháng",
+            "hint": "Đừng chỉ nghĩ đến tháng 2."
+        },
+        {
+            "q": "Bạn lấy 2 quả táo từ 3 quả. Bạn có mấy quả?",
+            "a": "2 quả",
+            "hint": "Bạn đã lấy bao nhiêu quả?"
+        },
+        {
+            "q": "Cái gì luôn ở phía trước bạn nhưng không thể nhìn thấy?",
+            "a": "Tương lai",
+            "hint": "Nó chưa xảy ra."
+        }
+    ],
+    "Hack não": [
+        {
+            "q": "Bố của Nam có 5 người con: Nana, Nene, Nini, Nono. Người con thứ 5 tên gì?",
+            "a": "Nam",
+            "hint": "Đọc câu đầu tiên thật kỹ."
+        },
+        {
+            "q": "Bạn vượt qua người đứng thứ hai trong cuộc đua. Bạn đứng thứ mấy?",
+            "a": "Thứ hai",
+            "hint": "Bạn thay thế vị trí của người đó."
+        },
+        {
+            "q": "Một người đi dưới mưa không mang ô, tóc không ướt. Vì sao?",
+            "a": "Vì người đó bị hói",
+            "hint": "Hãy nghĩ đến mái tóc."
+        },
+        {
+            "q": "Có 10 con cá trong bể, 2 con chết. Còn bao nhiêu con cá trong bể?",
+            "a": "10 con",
+            "hint": "Cá chết vẫn ở trong bể."
+        }
+    ]
+}
+
+# ==================================================
+# TRẠNG THÁI
+# ==================================================
+
+if "players" not in st.session_state:
+    st.session_state.players = DEFAULT_NAMES.copy()
+
+if "selected" not in st.session_state:
+    st.session_state.selected = None
+
+if "riddle" not in st.session_state:
+    st.session_state.riddle = None
+
+if "show_answer" not in st.session_state:
+    st.session_state.show_answer = False
+
+if "rounds" not in st.session_state:
+    st.session_state.rounds = 0
+
+if "volume" not in st.session_state:
+    st.session_state.volume = 35
+
+if "music_on" not in st.session_state:
+    st.session_state.music_on = False
+
+# ==================================================
+# TIÊU ĐỀ
+# ==================================================
+
 st.markdown(
-    "<h1>🛸 UFO HACK NÃO 🧠</h1>"
-    "<p style='text-align:center'>"
-    "👽 UFO săn người · ✨ Nhân vật phép thuật · 🎵 Nhạc vũ trụ"
-    "</p>",
+    '<div class="ufo-title">🛸 UFO HACK NÃO 🛸</div>',
     unsafe_allow_html=True
 )
 
-col1, col2, col3 = st.columns(3)
+st.markdown(
+    '<div class="ufo-subtitle">'
+    '🌌 Vũ trụ bí ẩn • Thử thách trí tuệ • Ai sẽ bị UFO bắt?'
+    '</div>',
+    unsafe_allow_html=True
+)
+
+# ==================================================
+# CÀI ĐẶT NGƯỜI CHƠI
+# ==================================================
+
+st.markdown("## ⚙️ Cài đặt trò chơi")
+
+col1, col2 = st.columns(2)
 
 with col1:
     player_count = st.number_input(
-        "👥 Số người chơi",
-        min_value=1,
+        "👥 Số lượng người chơi",
+        min_value=2,
         max_value=100,
-        value=20,
+        value=len(st.session_state.players),
         step=1
     )
 
 with col2:
-    level = st.selectbox(
-        "🧠 Cấp độ",
+    difficulty = st.selectbox(
+        "🧠 Chọn cấp độ",
         ["Dễ", "Trung bình", "Hack não"]
     )
 
-with col3:
-    speed = st.select_slider(
-        "🛸 Tốc độ UFO",
-        options=["Chậm", "Vừa", "Nhanh"],
-        value="Vừa"
+# Đồng bộ số lượng người chơi
+names = list(st.session_state.players)
+
+while len(names) < player_count:
+    names.append(f"Người chơi {len(names) + 1}")
+
+names = names[:player_count]
+st.session_state.players = names
+
+# ==================================================
+# ĐỔI TÊN NHÂN VẬT
+# ==================================================
+
+with st.expander("✏️ ĐỔI TÊN TỪNG NHÂN VẬT", expanded=False):
+
+    st.caption("Nhập tên mới cho từng người rồi bấm Lưu tên.")
+
+    with st.form("rename_form"):
+
+        edited_names = []
+
+        for start in range(0, int(player_count), 3):
+            cols = st.columns(3)
+
+            for j in range(3):
+                index = start + j
+
+                if index >= player_count:
+                    break
+
+                with cols[j]:
+                    new_name = st.text_input(
+                        f"Nhân vật {index + 1}",
+                        value=st.session_state.players[index],
+                        key=f"rename_{index}"
+                    )
+                    edited_names.append(new_name)
+
+        save_names = st.form_submit_button("💾 LƯU TÊN")
+
+    if save_names:
+        st.session_state.players = [
+            name.strip() or f"Người chơi {i + 1}"
+            for i, name in enumerate(edited_names)
+        ]
+
+        st.session_state.selected = None
+        st.session_state.riddle = None
+        st.session_state.show_answer = False
+
+        st.success("Đã lưu tên nhân vật!")
+        st.rerun()
+
+# ==================================================
+# NHẠC NỀN HỒI HỘP
+# ==================================================
+
+st.markdown("## 🎵 Nhạc nền")
+
+st.caption(
+    "Bấm phát nhạc để nghe nhạc điện tử hồi hộp. "
+    "Âm thanh được tạo trực tiếp trong trình duyệt."
+)
+
+music_col1, music_col2 = st.columns([2, 1])
+
+with music_col1:
+    music_on = st.toggle(
+        "🎶 Bật nhạc nền",
+        value=st.session_state.music_on,
+        key="music_toggle"
     )
+    st.session_state.music_on = music_on
 
-# Toàn bộ game chạy trong một khung HTML độc lập.
-# Nhạc và hoạt ảnh được xử lý trực tiếp bằng JavaScript.
+with music_col2:
+    volume = st.slider(
+        "🔊 Âm lượng",
+        min_value=0,
+        max_value=100,
+        value=st.session_state.volume,
+        key="music_volume"
+    )
+    st.session_state.volume = volume
 
-game_html = r"""
+# Trình phát nhạc riêng trong iframe.
+# Trạng thái bật/tắt được truyền vào iframe.
+music_html = """
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport"
- content="width=device-width, initial-scale=1, maximum-scale=1,
- user-scalable=no">
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-* {
-    box-sizing: border-box;
-}
-
-html, body {
+body {
     margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    font-family: Arial, Helvetica, sans-serif;
-    background: #100c2b;
+    background: transparent;
     color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
 }
-
-#game {
-    width: 100%;
-    height: 590px;
-    max-height: 85vh;
-    min-height: 430px;
-    overflow: hidden;
-    position: relative;
-    border: 2px solid #8067ff;
-    border-radius: 20px;
-    background:
-        radial-gradient(ellipse at 50% 0%,
-        #493a8d 0%, #17113b 50%, #09091c 100%);
-    display: flex;
-    flex-direction: column;
-}
-
-#topbar {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 12px;
-    gap: 5px;
-    background: rgba(10, 7, 35, .8);
-    border-bottom: 1px solid #54449c;
-}
-
-.badge {
-    background: #2a215c;
-    color: #ffe66d;
-    padding: 7px 9px;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: bold;
-    white-space: nowrap;
-}
-
-#arena {
-    width: 100%;
-    flex: 1;
-    min-height: 0;
-    position: relative;
-    overflow: hidden;
-}
-
-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    touch-action: manipulation;
-}
-
-#bottom {
-    flex-shrink: 0;
-    background: rgba(10, 7, 35, .94);
-    border-top: 1px solid #54449c;
-    padding: 8px;
-}
-
-.buttons {
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
 button {
     border: 0;
     border-radius: 12px;
-    padding: 10px 12px;
-    font-size: 12px;
+    padding: 12px 20px;
+    font-size: 15px;
     font-weight: bold;
     color: white;
-    background: #6845df;
-    cursor: pointer;
-    touch-action: manipulation;
-}
-
-button:active {
-    transform: scale(.96);
-}
-
-.primary {
-    background: linear-gradient(135deg, #ff4fa0, #8c4dff);
-}
-
-.music {
-    background: #26345d;
-}
-
-#message {
-    color: #ffe99a;
-    text-align: center;
-    font-size: 12px;
-    min-height: 16px;
-    margin-top: 6px;
-}
-
-#quiz {
-    display: none;
-    position: absolute;
-    inset: 8px;
-    z-index: 10;
-    border: 2px solid #bba5ff;
-    border-radius: 18px;
-    background: rgba(20, 14, 57, .97);
-    padding: 16px;
-    text-align: center;
-    overflow-y: auto;
-}
-
-#quiz h3 {
-    color: #ffe66d;
-}
-
-#question {
-    font-size: 17px;
-    line-height: 1.5;
-    font-weight: bold;
-}
-
-#answer {
-    width: 100%;
-    max-width: 300px;
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid #9480ff;
-    background: #171033;
-    color: white;
-    font-size: 16px;
-    margin: 10px auto;
-}
-
-#result {
-    color: #a5ffca;
-    font-weight: bold;
-    line-height: 1.5;
-}
-
-.quizbuttons {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-@media (max-width: 500px) {
-    #game {
-        height: 590px;
-        max-height: 78vh;
-        min-height: 400px;
-        border-radius: 14px;
-    }
-
-    .badge {
-        padding: 6px;
-        font-size: 10px;
-    }
-
-    button {
-        padding: 9px;
-        font-size: 11px;
-    }
-
-    #question {
-        font-size: 15px;
-    }
+    background: linear-gradient(135deg,#ff45c8,#7957ff);
 }
 </style>
 </head>
-
 <body>
-<div id="game">
-
-    <div id="topbar">
-        <div class="badge">🛸 UFO HACK NÃO</div>
-        <div class="badge" id="counter">👥 0/20</div>
-        <div class="badge" id="levelBadge">🧠 DỄ</div>
-    </div>
-
-    <div id="arena">
-        <canvas id="canvas"></canvas>
-
-        <div id="quiz">
-            <h3>🛸 UFO ĐÃ CHỌN BẠN!</h3>
-            <div id="chosenName"></div>
-            <p id="question"></p>
-
-            <input id="answer"
-                   type="text"
-                   autocomplete="off"
-                   placeholder="Nhập câu trả lời...">
-
-            <div class="quizbuttons">
-                <button class="primary" onclick="checkAnswer()">
-                    ✨ Trả lời
-                </button>
-                <button onclick="closeQuiz()">
-                    Đóng
-                </button>
-            </div>
-
-            <p id="result"></p>
-        </div>
-    </div>
-
-    <div id="bottom">
-        <div class="buttons">
-            <button class="primary" onclick="startGame()">
-                🚀 BẮT ĐẦU
-            </button>
-
-            <button onclick="choosePerson()">
-                👽 UFO CHỌN NGƯỜI
-            </button>
-
-            <button class="music" id="musicBtn"
-                    onclick="toggleMusic()">
-                🎵 BẬT NHẠC
-            </button>
-        </div>
-
-        <div class="buttons" style="margin-top:6px">
-            <button onclick="changeVolume(-1)">🔉 Giảm nhạc</button>
-            <button onclick="changeVolume(1)">🔊 Tăng nhạc</button>
-        </div>
-
-        <div id="message">
-            Nhấn BẮT ĐẦU để triệu hồi UFO! ✨
-        </div>
+<div style="padding:8px">
+    <div style="font-size:28px">🎼 🛸 🎼</div>
+    <button id="btn">▶ PHÁT NHẠC</button>
+    <div id="status" style="margin-top:8px;font-size:12px">
+        Bấm nút để bắt đầu âm thanh
     </div>
 </div>
-
 <script>
-"use strict";
+let ctx = null;
+let master = null;
+let timer = null;
+let playing = false;
+let noteIndex = 0;
 
-const CONFIG = {
-    players: __PLAYERS__,
-    level: "__LEVEL__",
-    speed: "__SPEED__"
-};
+function note(freq, duration, type, vol) {
+    if (!ctx || !master) return;
 
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
 
-let W = 800;
-let H = 400;
-let frame = 0;
-let running = false;
-let beam = 0;
-let selected = -1;
-let playerList = [];
-let stars = [];
-let score = 0;
-let currentQuestion = null;
-let answered = new Set();
+    osc.type = type;
+    osc.frequency.value = freq;
 
-let music = false;
-let audio = null;
-let musicTimer = null;
-let musicVolume = 0.10;
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(
+        Math.max(0.0002, vol),
+        ctx.currentTime + 0.04
+    );
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        ctx.currentTime + duration
+    );
 
-const names = [
-    "Thỏ Hồng", "Minh Huy", "Phương Mai",
-    "Tuấn Minh", "Quỳnh Anh", "Trúc Mai",
-    "Hải", "Thanh Thảo", "Huy Khánh",
-    "Dũng", "Mạnh", "Bảo Ngọc",
-    "Khánh Linh", "Gia Huy", "Minh Anh",
-    "Đức Anh", "Phương Linh", "Hoàng",
-    "Nhật Minh", "Tuấn Anh"
-];
+    osc.connect(gain);
+    gain.connect(master);
 
-const quizzes = {
-    "Dễ": [
-        {q:"Có 3 quả táo, lấy đi 2 quả. Bạn có mấy quả?",
-         a:["2","hai"]},
-        {q:"Một tuần có bao nhiêu ngày?",
-         a:["7","bảy"]},
-        {q:"Số tiếp theo: 2, 4, 6, 8, ...?",
-         a:["10","mười"]},
-        {q:"Con gì có 4 chân nhưng không tự đi?",
-         a:["cái bàn","bàn"]},
-        {q:"1 kg bông và 1 kg sắt, cái nào nặng hơn?",
-         a:["bằng nhau","như nhau","bang nhau"]}
-    ],
-
-    "Trung bình": [
-        {q:"Số tiếp theo: 1, 1, 2, 3, 5, 8, ...?",
-         a:["13","mười ba"]},
-        {q:"Có 5 người, mỗi người bắt tay tất cả người còn lại. Có bao nhiêu cái bắt tay?",
-         a:["10","mười"]},
-        {q:"Một chiếc đồng hồ điểm 6 tiếng trong 5 giây. Điểm 12 tiếng mất bao lâu?",
-         a:["11 giây","11","mười một giây"]},
-        {q:"Tôi càng lấy đi, tôi càng lớn. Tôi là gì?",
-         a:["cái hố","hố","cai ho"]},
-        {q:"Số nào nhân với số nào cũng bằng chính nó?",
-         a:["0","không"]}
-    ],
-
-    "Hack não": [
-        {q:"Một người có 2 đồng tiền tổng cộng 15 nghìn đồng. Một đồng không phải 5 nghìn. Đó là hai đồng nào?",
-         a:["10 và 5","5 và 10","mười nghìn và năm nghìn"]},
-        {q:"Có 10 con cá trong bể, 2 con chết. Còn mấy con cá trong bể?",
-         a:["10","mười"]},
-        {q:"Bạn vượt người đứng thứ hai trong cuộc đua. Bạn đứng thứ mấy?",
-         a:["thứ hai","2","hai"]},
-        {q:"Số tiếp theo: 1, 4, 9, 16, 25, ...?",
-         a:["36","ba mươi sáu"]},
-        {q:"Một căn phòng có 4 góc, mỗi góc có một con mèo. Mỗi con mèo nhìn thấy 3 con còn lại. Có bao nhiêu con mèo?",
-         a:["4","bốn"]}
-    ]
-};
-
-function resizeCanvas() {
-    const rect = canvas.getBoundingClientRect();
-
-    if (rect.width <= 0 || rect.height <= 0) return;
-
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-    W = rect.width;
-    H = rect.height;
-
-    canvas.width = Math.round(W * dpr);
-    canvas.height = Math.round(H * dpr);
-
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    stars = Array.from({length: 55}, () => ({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        r: Math.random() * 1.7 + .3,
-        phase: Math.random() * 6
-    }));
-
-    makePlayers();
-    draw();
+    osc.start();
+    osc.stop(ctx.currentTime + duration + 0.05);
 }
 
-function makePlayers() {
-    playerList = [];
+function loop() {
+    if (!playing) return;
 
-    const count = CONFIG.players;
-    const cols = Math.max(3, Math.floor(W / 65));
-    const rows = Math.ceil(count / cols);
+    const notes = [110,130.81,164.81,146.83,98,123.47,185,146.83];
+    const n = notes[noteIndex % notes.length];
 
-    for (let i = 0; i < count; i++) {
-        const col = i % cols;
-        const row = Math.floor(i / cols);
+    note(n, 0.6, "triangle", 0.15);
+    note(n * 2, 0.25, "sine", 0.055);
 
-        playerList.push({
-            name: names[i % names.length] +
-                  (i >= names.length ? " " + (i + 1) : ""),
-            x: (col + 0.5) * W / cols,
-            y: H * 0.43 + row * Math.min(45, H * 0.13),
-            type: i % 5,
-            phase: Math.random() * 6,
-            visible: true,
-            captured: false
-        });
+    if (noteIndex % 2 === 0) {
+        note(55, 0.25, "sine", 0.16);
     }
 
-    document.getElementById("counter").textContent =
-        "👥 " + count + " người";
+    if (noteIndex % 4 === 3) {
+        note(n * 4, 0.4, "sine", 0.035);
+    }
 
-    document.getElementById("levelBadge").textContent =
-        "🧠 " + CONFIG.level.toUpperCase();
+    noteIndex++;
 }
 
-function roundedRect(x, y, w, h, r, color) {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.roundRect(x, y, w, h, r);
-    ctx.fill();
-}
-
-function drawBackground() {
-    const gradient = ctx.createLinearGradient(0, 0, 0, H);
-
-    gradient.addColorStop(0, "#201547");
-    gradient.addColorStop(1, "#111c37");
-
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, W, H);
-
-    for (const s of stars) {
-        const alpha = .45 + Math.sin(frame * .04 + s.phase) * .4;
-
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = "#ffffff";
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fill();
+async function toggleMusic() {
+    if (!ctx) {
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        master = ctx.createGain();
+        master.gain.value = 0.7;
+        master.connect(ctx.destination);
     }
 
-    ctx.globalAlpha = 1;
-
-    // Mặt đất
-    ctx.fillStyle = "#263956";
-    ctx.fillRect(0, H * .77, W, H * .23);
-
-    // Thành phố
-    const buildingW = Math.max(40, W / 12);
-
-    for (let x = 0; x < W; x += buildingW) {
-        const bh = H * (.12 + ((Math.floor(x) % 4) * .035));
-
-        ctx.fillStyle = "#39345f";
-        ctx.fillRect(x, H * .77 - bh, buildingW - 3, bh);
-
-        for (let wy = H * .77 - bh + 8; wy < H * .75; wy += 13) {
-            ctx.fillStyle = "#ffe69b";
-
-            for (let wx = x + 7; wx < x + buildingW - 6; wx += 13) {
-                ctx.fillRect(wx, wy, 4, 5);
-            }
-        }
+    if (ctx.state === "suspended") {
+        await ctx.resume();
     }
 
-    ctx.fillStyle = "#131a35";
-    ctx.fillRect(0, H * .77, W, H * .035);
-}
-
-function drawUFO() {
-    const ux = W / 2;
-    const uy = H * .20 + Math.sin(frame * .04) * 4;
-
-    // Luồng sáng
-    if (beam > 0) {
-        const grad = ctx.createLinearGradient(
-            ux, uy + 15, ux, H * .83
-        );
-
-        grad.addColorStop(0, "rgba(115,255,230,.48)");
-        grad.addColorStop(1, "rgba(115,255,230,0)");
-
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.moveTo(ux - 18, uy + 10);
-        ctx.lineTo(ux - 65 - beam, H * .84);
-        ctx.lineTo(ux + 65 + beam, H * .84);
-        ctx.lineTo(ux + 18, uy + 10);
-        ctx.closePath();
-        ctx.fill();
-    }
-
-    // Vòm UFO
-    ctx.fillStyle = "#83f9f1";
-    ctx.beginPath();
-    ctx.ellipse(ux, uy - 10, 26, 18, 0, Math.PI, Math.PI * 2);
-    ctx.fill();
-
-    // Thân tàu
-    const g = ctx.createLinearGradient(ux - 75, uy, ux + 75, uy);
-
-    g.addColorStop(0, "#b8c7ff");
-    g.addColorStop(.5, "#ffffff");
-    g.addColorStop(1, "#9a8bff");
-
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.ellipse(ux, uy, 77, 19, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Viền
-    ctx.strokeStyle = "#91e7ff";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Đèn
-    for (let i = -2; i <= 2; i++) {
-        ctx.fillStyle = frame % 30 < 15 ? "#ffe66d" : "#ff75ce";
-        ctx.beginPath();
-        ctx.arc(ux + i * 27, uy + 7, 3.5, 0, Math.PI * 2);
-        ctx.fill();
-    }
-
-    ctx.fillStyle = "#a3fff4";
-    ctx.beginPath();
-    ctx.ellipse(ux, uy + 19, 24, 5, 0, 0, Math.PI * 2);
-    ctx.fill();
-}
-
-function drawCharacter(p, i) {
-    if (!p.visible) return;
-
-    let x = p.x;
-    let y = p.y + Math.sin(frame * .04 + p.phase) * 2;
-
-    if (p.captured) {
-        y -= beam * 1.25;
-    }
-
-    ctx.save();
-    ctx.translate(x, y);
-
-    const scale = Math.min(1, W / 650);
-    ctx.scale(scale, scale);
-
-    // Bóng
-    ctx.fillStyle = "rgba(0,0,0,.2)";
-    ctx.beginPath();
-    ctx.ellipse(0, 22, 13, 4, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Chân
-    ctx.strokeStyle = "#392c40";
-    ctx.lineWidth = 4;
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    ctx.moveTo(-5, 8);
-    ctx.lineTo(-7, 21);
-    ctx.moveTo(5, 8);
-    ctx.lineTo(7, 21);
-    ctx.stroke();
-
-    if (p.type === 0) {
-        // Thỏ hồng
-        ctx.fillStyle = "#f6a8ca";
-        ctx.strokeStyle = "#573447";
-        ctx.lineWidth = 2.5;
-
-        ctx.beginPath();
-        ctx.ellipse(-7, -26, 6, 17, -.15, 0, Math.PI * 2);
-        ctx.ellipse(7, -26, 6, 17, .15, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.roundRect(-11, -4, 22, 24, 7);
-        ctx.arc(0, -13, 15, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "#573447";
-        ctx.beginPath();
-        ctx.arc(-5, -15, 2, 0, Math.PI * 2);
-        ctx.arc(5, -15, 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = "#573447";
-        ctx.beginPath();
-        ctx.moveTo(-3, -8);
-        ctx.lineTo(0, -6);
-        ctx.lineTo(3, -8);
-        ctx.stroke();
-
-        ctx.fillStyle = "#ff759f";
-        ctx.beginPath();
-        ctx.arc(-10, -10, 3, 0, Math.PI * 2);
-        ctx.arc(10, -10, 3, 0, Math.PI * 2);
-        ctx.fill();
-
-    } else if (p.type === 1) {
-        // Cậu bé áo đỏ
-        ctx.fillStyle = "#ffe64f";
-        ctx.strokeStyle = "#30212b";
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.roundRect(-13, 2, 26, 15, 4);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "#e62c46";
-        ctx.beginPath();
-        ctx.moveTo(-12, -16);
-        ctx.lineTo(12, -16);
-        ctx.lineTo(15, 7);
-        ctx.lineTo(-15, 7);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "#ffc09d";
-        ctx.beginPath();
-        ctx.ellipse(0, -21, 16, 17, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "#111015";
-        ctx.beginPath();
-        ctx.arc(0, -29, 17, Math.PI, Math.PI * 2);
-        ctx.lineTo(15, -21);
-        ctx.lineTo(5, -27);
-        ctx.lineTo(-4, -23);
-        ctx.lineTo(-15, -18);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.strokeStyle = "#111015";
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(-11, -23);
-        ctx.lineTo(-3, -20);
-        ctx.moveTo(11, -23);
-        ctx.lineTo(3, -20);
-        ctx.stroke();
-
-    } else if (p.type === 2) {
-        // Pháp sư hoàng gia
-        ctx.fillStyle = "#fff4df";
-        ctx.strokeStyle = "#c69b59";
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(-11, -12);
-        ctx.lineTo(11, -12);
-        ctx.lineTo(19, 19);
-        ctx.lineTo(-19, 19);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "#90a992";
-        ctx.strokeStyle = "#29372e";
-        ctx.beginPath();
-        ctx.arc(0, -22, 16, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "#e9b04f";
-        ctx.beginPath();
-        ctx.moveTo(-15, -33);
-        ctx.lineTo(-12, -44);
-        ctx.lineTo(-4, -37);
-        ctx.lineTo(0, -47);
-        ctx.lineTo(5, -37);
-        ctx.lineTo(13, -44);
-        ctx.lineTo(16, -33);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "#18291f";
-        ctx.beginPath();
-        ctx.arc(-5, -23, 2, 0, Math.PI * 2);
-        ctx.arc(5, -23, 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = "#8b553a";
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(18, -3);
-        ctx.lineTo(22, 21);
-        ctx.stroke();
-
-        ctx.fillStyle = "#ffe56b";
-        ctx.beginPath();
-        ctx.arc(17, -7, 4, 0, Math.PI * 2);
-        ctx.fill();
-
-    } else if (p.type === 3) {
-        // Pháp sư tóc tím
-        ctx.fillStyle = "#8250bd";
-        ctx.strokeStyle = "#402454";
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(-11, -12);
-        ctx.lineTo(11, -12);
-        ctx.lineTo(19, 19);
-        ctx.lineTo(-19, 19);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "#91a992";
-        ctx.strokeStyle = "#29372e";
-        ctx.beginPath();
-        ctx.arc(0, -21, 16, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "#9958e5";
-        ctx.strokeStyle = "#56306f";
-        ctx.beginPath();
-
-        for (let k = 0; k < 11; k++) {
-            const angle = Math.PI + k * Math.PI / 10;
-            const radius = k % 2 === 0 ? 23 : 15;
-            const px = Math.cos(angle) * radius;
-            const py = -24 + Math.sin(angle) * radius;
-
-            if (k === 0) ctx.moveTo(px, py);
-            else ctx.lineTo(px, py);
-        }
-
-        ctx.lineTo(13, -30);
-        ctx.lineTo(5, -34);
-        ctx.lineTo(-4, -30);
-        ctx.lineTo(-13, -32);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "#18291f";
-        ctx.beginPath();
-        ctx.arc(-5, -21, 2, 0, Math.PI * 2);
-        ctx.arc(5, -21, 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = "#6f4ad1";
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(18, -3);
-        ctx.lineTo(22, 21);
-        ctx.stroke();
-
-        ctx.fillStyle = "#71f5ff";
-        ctx.beginPath();
-        ctx.arc(17, -7, 4, 0, Math.PI * 2);
-        ctx.fill();
-
+    if (!playing) {
+        playing = true;
+        loop();
+        timer = setInterval(loop, 380);
+        document.getElementById("btn").innerText = "⏸ TẮT NHẠC";
+        document.getElementById("status").innerText = "🎵 Nhạc đang phát";
     } else {
-        // Cô bé tóc hồng
-        ctx.fillStyle = "#ff83b6";
-        ctx.strokeStyle = "#9c326b";
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(-11, -12);
-        ctx.lineTo(11, -12);
-        ctx.lineTo(19, 19);
-        ctx.lineTo(-19, 19);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "#91a992";
-        ctx.strokeStyle = "#29372e";
-        ctx.beginPath();
-        ctx.arc(0, -22, 16, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "#ff64ac";
-        ctx.beginPath();
-        ctx.arc(0, -28, 18, Math.PI, Math.PI * 2);
-        ctx.lineTo(18, -16);
-        ctx.lineTo(10, -20);
-        ctx.lineTo(4, -16);
-        ctx.lineTo(-4, -20);
-        ctx.lineTo(-12, -16);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = "#ff3e91";
-        ctx.beginPath();
-        ctx.arc(-12, -35, 5, 0, Math.PI * 2);
-        ctx.arc(12, -35, 5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = "#17261e";
-        ctx.beginPath();
-        ctx.arc(-5, -22, 2, 0, Math.PI * 2);
-        ctx.arc(5, -22, 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = "#ffe76c";
-        ctx.beginPath();
-        ctx.arc(0, -6, 4, 0, Math.PI * 2);
-        ctx.fill();
-    }
-
-    // Hiệu ứng lấp lánh
-    if (p.captured) {
-        for (let k = 0; k < 5; k++) {
-            const angle = frame * .09 + k * Math.PI * 2 / 5;
-
-            ctx.fillStyle = k % 2 ? "#ffe66d" : "#77f8ff";
-            ctx.beginPath();
-            ctx.arc(
-                Math.cos(angle) * 22,
-                Math.sin(angle) * 20 - 10,
-                2.5, 0, Math.PI * 2
-            );
-            ctx.fill();
-        }
-    }
-
-    ctx.restore();
-
-    // Nhãn tên
-    ctx.font = "bold 10px Arial";
-
-    const labelWidth = Math.min(
-        ctx.measureText(p.name).width + 10, 100
-    );
-
-    roundedRect(
-        x - labelWidth / 2,
-        y - 52,
-        labelWidth,
-        15,
-        4,
-        p.captured ? "#ffe66d" : "#ffffff"
-    );
-
-    ctx.fillStyle = "#29203e";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(p.name, x, y - 44, labelWidth - 5);
-}
-
-function draw() {
-    drawBackground();
-
-    // UFO ở trung tâm
-    drawUFO();
-
-    // Nhân vật
-    playerList.forEach(drawCharacter);
-
-    // Hướng dẫn
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.font = "bold 12px Arial";
-    ctx.fillStyle = "#d6d0ff";
-
-    if (!running) {
-        ctx.fillText(
-            "NHẤN BẮT ĐẦU ĐỂ TRIỆU HỒI UFO",
-            W / 2,
-            H * .37
-        );
+        playing = false;
+        clearInterval(timer);
+        document.getElementById("btn").innerText = "▶ PHÁT NHẠC";
+        document.getElementById("status").innerText = "Nhạc đã tắt";
     }
 }
 
-function animate() {
-    frame++;
-
-    if (running && selected >= 0) {
-        beam = Math.min(beam + 1.5, 30);
-
-        const p = playerList[selected];
-
-        if (p) {
-            p.captured = true;
-            p.y = Math.max(p.y - .4, H * .38);
-        }
-    }
-
-    draw();
-    requestAnimationFrame(animate);
-}
-
-function setMessage(message) {
-    document.getElementById("message").textContent = message;
-}
-
-function startGame() {
-    running = true;
-    selected = -1;
-    beam = 0;
-
-    playerList.forEach(p => {
-        p.visible = true;
-        p.captured = false;
-    });
-
-    setMessage("🚀 UFO đã xuất hiện! Hãy chọn người chơi.");
-
-    draw();
-}
-
-function choosePerson() {
-    if (selected >= 0 && playerList[selected]) {
-        playerList[selected].captured = false;
-        playerList[selected].visible = true;
-    }
-
-    const available = playerList
-        .map((p, i) => ({p, i}))
-        .filter(item => !answered.has(item.i));
-
-    if (available.length === 0) {
-        answered.clear();
-    }
-
-    const candidates = playerList
-        .map((p, i) => ({p, i}))
-        .filter(item => !answered.has(item.i));
-
-    const chosen = candidates[
-        Math.floor(Math.random() * candidates.length)
-    ];
-
-    selected = chosen.i;
-    running = true;
-    beam = 0;
-
-    playerList.forEach(p => p.captured = false);
-
-    const p = playerList[selected];
-    p.captured = true;
-
-    document.getElementById("chosenName").textContent =
-        "👤 Người chơi: " + p.name;
-
-    const bank = quizzes[CONFIG.level];
-    currentQuestion = bank[Math.floor(Math.random() * bank.length)];
-
-    document.getElementById("question").textContent =
-        "🧠 " + currentQuestion.q;
-
-    document.getElementById("answer").value = "";
-    document.getElementById("result").textContent = "";
-
-    document.getElementById("quiz").style.display = "block";
-
-    setMessage("🛸 UFO đã chọn " + p.name + "!");
-
-    setTimeout(() => {
-        document.getElementById("answer").focus();
-    }, 100);
-}
-
-function checkAnswer() {
-    if (!currentQuestion || selected < 0) return;
-
-    const value = document.getElementById("answer")
-        .value.trim().toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/đ/g, "d")
-        .replace(/[^a-z0-9 ]/g, "")
-        .replace(/\s+/g, " ");
-
-    const valid = currentQuestion.a.map(a =>
-        a.toLowerCase()
-         .normalize("NFD")
-         .replace(/[\u0300-\u036f]/g, "")
-         .replace(/đ/g, "d")
-         .replace(/[^a-z0-9 ]/g, "")
-         .replace(/\s+/g, " ")
-    );
-
-    if (valid.includes(value)) {
-        score++;
-
-        document.getElementById("result").textContent =
-            "🎉 Chính xác! Bạn đã giải được câu đố! Điểm: " + score;
-
-        answered.add(selected);
-
-        setMessage("✨ " + playerList[selected].name +
-                   " trả lời đúng! Điểm: " + score);
-    } else {
-        document.getElementById("result").textContent =
-            "🤔 Chưa đúng rồi! Hãy thử lại nhé.";
-
-        setMessage("🧠 Hãy suy nghĩ thêm một chút!");
-    }
-}
-
-function closeQuiz() {
-    document.getElementById("quiz").style.display = "none";
-
-    if (selected >= 0 && playerList[selected]) {
-        playerList[selected].captured = false;
-    }
-
-    selected = -1;
-    beam = 0;
-    running = false;
-    draw();
-}
-
-function toggleMusic() {
-    if (!music) {
-        const AudioContextClass =
-            window.AudioContext || window.webkitAudioContext;
-
-        if (!AudioContextClass) {
-            setMessage("Trình duyệt chưa hỗ trợ âm thanh.");
-            return;
-        }
-
-        audio = new AudioContextClass();
-        music = true;
-
-        document.getElementById("musicBtn").textContent =
-            "🔇 TẮT NHẠC";
-
-        audio.resume().then(playMagicMusic);
-
-        setMessage("🎵 Nhạc vũ trụ đang phát!");
-    } else {
-        music = false;
-        clearTimeout(musicTimer);
-
-        if (audio) {
-            audio.close();
-            audio = null;
-        }
-
-        document.getElementById("musicBtn").textContent =
-            "🎵 BẬT NHẠC";
-
-        setMessage("🔇 Đã tắt nhạc.");
-    }
-}
-
-function playMagicMusic() {
-    if (!music || !audio) return;
-
-    const melody = [
-        523.25, 659.25, 783.99, 659.25,
-        587.33, 698.46, 880.00, 698.46,
-        523.25, 783.99, 1046.50, 783.99,
-        659.25, 587.33, 523.25, 392.00
-    ];
-
-    let index = 0;
-
-    function playNote() {
-        if (!music || !audio) return;
-
-        const now = audio.currentTime;
-        const frequency = melody[index % melody.length];
-
-        const osc = audio.createOscillator();
-        const gain = audio.createGain();
-
-        osc.type = "triangle";
-        osc.frequency.value = frequency;
-
-        gain.gain.setValueAtTime(.0001, now);
-        gain.gain.exponentialRampToValueAtTime(
-            musicVolume, now + .04
-        );
-        gain.gain.exponentialRampToValueAtTime(
-            .0001, now + .32
-        );
-
-        osc.connect(gain);
-        gain.connect(audio.destination);
-
-        osc.start(now);
-        osc.stop(now + .35);
-
-        if (index % 4 === 0) {
-            const bass = audio.createOscillator();
-            const bg = audio.createGain();
-
-            bass.type = "sine";
-            bass.frequency.value = 130.81;
-
-            bg.gain.setValueAtTime(.0001, now);
-            bg.gain.exponentialRampToValueAtTime(
-                musicVolume * .4, now + .04
-            );
-            bg.gain.exponentialRampToValueAtTime(
-                .0001, now + .28
-            );
-
-            bass.connect(bg);
-            bg.connect(audio.destination);
-
-            bass.start(now);
-            bass.stop(now + .3);
-        }
-
-        index++;
-        musicTimer = setTimeout(playNote, 280);
-    }
-
-    playNote();
-}
-
-function changeVolume(direction) {
-    musicVolume = Math.max(
-        .01,
-        Math.min(.20, musicVolume + direction * .02)
-    );
-
-    setMessage(
-        "🔊 Âm lượng: " +
-        Math.round(musicVolume / .20 * 100) + "%"
-    );
-}
-
-document.getElementById("answer").addEventListener(
-    "keydown",
-    event => {
-        if (event.key === "Enter") checkAnswer();
-    }
-);
-
-window.addEventListener("resize", resizeCanvas);
-
-if ("ResizeObserver" in window) {
-    new ResizeObserver(resizeCanvas).observe(
-        document.getElementById("arena")
-    );
-}
-
-makePlayers();
-resizeCanvas();
-animate();
+document.getElementById("btn").addEventListener("click", toggleMusic);
 </script>
 </body>
 </html>
 """
 
-# Đưa cài đặt Streamlit vào game.
-game_html = (
-    game_html
-    .replace("__PLAYERS__", str(int(player_count)))
-    .replace("__LEVEL__", level)
-    .replace("__SPEED__", speed)
+components.html(music_html, height=110)
+
+st.info(
+    "Lưu ý: trình phát nhạc chạy trong khung riêng. "
+    "Bạn cần bấm nút phát nhạc trong khung đó; "
+    "âm thanh có thể dừng khi trang được tải lại."
 )
 
+# ==================================================
+# UFO CHỌN NGƯỜI
+# ==================================================
+
+st.markdown("---")
+st.markdown("## 🛸 UFO ĐANG QUÉT TÍN HIỆU")
+
+st.markdown(
+    f"""
+    <div class="panel" style="text-align:center;">
+        <div style="font-size:clamp(55px,10vw,100px);">🛸</div>
+        <div style="font-size:20px;font-weight:900;color:#a9f7ff;">
+            HỆ THỐNG UFO SẴN SÀNG
+        </div>
+        <div style="margin-top:8px;">
+            👥 {len(st.session_state.players)} người chơi
+            &nbsp; | &nbsp; 🧠 {difficulty}
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+col_start, col_reset = st.columns(2)
+
+with col_start:
+    start_game = st.button(
+        "🚀 KÍCH HOẠT UFO",
+        use_container_width=True
+    )
+
+with col_reset:
+    reset_game = st.button(
+        "🔄 VÁN MỚI",
+        use_container_width=True
+    )
+
+if reset_game:
+    st.session_state.selected = None
+    st.session_state.riddle = None
+    st.session_state.show_answer = False
+    st.rerun()
+
+if start_game:
+    animation = st.empty()
+
+    for i in range(10):
+        random_name = random.choice(st.session_state.players)
+
+        animation.markdown(
+            f"""
+            <div class="result">
+                🛸 UFO ĐANG QUÉT...
+                <br><br>
+                📡 {html.escape(random_name)}
+                <br><br>
+                ✨ ĐANG KHÓA MỤC TIÊU ✨
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        time.sleep(0.1 + i * 0.025)
+
+    st.session_state.selected = random.choice(
+        st.session_state.players
+    )
+
+    st.session_state.riddle = random.choice(
+        RIDDLES[difficulty]
+    )
+
+    st.session_state.show_answer = False
+    st.session_state.rounds += 1
+
+    st.rerun()
+
+# ==================================================
+# KẾT QUẢ UFO
+# ==================================================
+
+if st.session_state.selected:
+
+    selected = st.session_state.selected
+
+    st.markdown(
+        f"""
+        <div class="result">
+            🛸 UFO ĐÃ BẮT ĐƯỢC!
+            <br><br>
+            🌟 {html.escape(selected)} 🌟
+            <br><br>
+            😈 CHUẨN BỊ GIẢI MÃ!
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown("### 🧠 THỬ THÁCH DÀNH CHO NGƯỜI BỊ BẮT")
+
+    riddle = st.session_state.riddle
+
+    st.markdown(
+        f"""
+        <div class="panel" style="text-align:center;">
+            <div style="font-size:17px;color:#c7c4ff;">
+                CẤP ĐỘ: {html.escape(difficulty.upper())}
+            </div>
+            <div style="
+                font-size:clamp(19px,3vw,27px);
+                font-weight:900;
+                margin-top:15px;
+            ">
+                {html.escape(riddle["q"])}
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    with st.expander("💡 GỢI Ý BÍ MẬT"):
+        st.write(riddle["hint"])
+
+    if st.button("🔓 GIẢI MÃ ĐÁP ÁN"):
+        st.session_state.show_answer = True
+
+    if st.session_state.show_answer:
+        st.success(f"🎯 Đáp án: {riddle['a']}")
+
+        if st.button("🛸 CHỌN NGƯỜI TIẾP THEO"):
+            st.session_state.selected = None
+            st.session_state.riddle = None
+            st.session_state.show_answer = False
+            st.rerun()
+
+# ==================================================
+# DANH SÁCH NHÂN VẬT RESPONSIVE
+# ==================================================
+
+st.markdown("---")
+st.markdown("## 👾 PHI ĐỘI NGƯỜI CHƠI")
+
+names = st.session_state.players
+selected = st.session_state.selected
+
+st.markdown(
+    f"""
+    <div class="panel" style="text-align:center;">
+        <div style="font-size:20px;font-weight:900;">
+            👥 ĐANG CÓ {len(names)} NGƯỜI CHƠI
+        </div>
+        <div style="margin-top:8px;overflow-wrap:anywhere;">
+            🛸 UFO ĐÃ CHỌN:
+            {html.escape(selected) if selected else "CHƯA CHỌN"}
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+cards = []
+
+for index, name in enumerate(names):
+    avatar = CHARACTERS[index % len(CHARACTERS)]
+    safe_name = html.escape(name)
+
+    if name == selected:
+        card = f"""
+        <div class="player-card selected-card">
+            <div class="player-avatar">🛸</div>
+            <div class="player-avatar">{avatar}</div>
+            <div class="player-name">{safe_name}</div>
+            <div class="status">🎯 ĐÃ BỊ BẮT</div>
+        </div>
+        """
+    else:
+        card = f"""
+        <div class="player-card">
+            <div class="player-avatar">{avatar}</div>
+            <div class="player-name">{safe_name}</div>
+            <div class="status">👾 SẴN SÀNG</div>
+        </div>
+        """
+
+    cards.append(card)
+
+cards_html = "".join(cards)
+
+# Khung độc lập, tự đổi số cột theo độ rộng màn hình.
+# Chiều cao được tính theo số hàng trên điện thoại.
+players_html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* {{
+    box-sizing: border-box;
+}}
+
+html, body {{
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    background: transparent;
+    color: white;
+    font-family: Arial, sans-serif;
+}}
+
+.players-grid {{
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+}}
+
+.player-card {{
+    min-width: 0;
+    min-height: 90px;
+    padding: 8px 3px;
+    text-align: center;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    border: 1px solid #8b78ff;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #282d65, #46286d);
+}}
+
+.player-avatar {{
+    font-size: clamp(20px, 4vw, 32px);
+    line-height: 1.35;
+}}
+
+.player-name {{
+    font-size: clamp(10px, 1.5vw, 14px);
+    font-weight: bold;
+    overflow-wrap: anywhere;
+}}
+
+.status {{
+    margin-top: 4px;
+    font-size: 10px;
+    color: #d8d0ff;
+}}
+
+.selected-card {{
+    background: linear-gradient(135deg, #ff42c8, #ff8b5e);
+    border: 2px solid #fff3a3;
+    box-shadow: 0 0 15px #ff45c8;
+}}
+
+@media (max-width: 600px) {{
+    .players-grid {{
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 5px;
+    }}
+
+    .player-card {{
+        min-height: 80px;
+        padding: 6px 2px;
+        border-radius: 9px;
+    }}
+
+    .player-avatar {{
+        font-size: 24px;
+    }}
+
+    .player-name {{
+        font-size: 11px;
+    }}
+
+    .status {{
+        font-size: 9px;
+    }}
+}}
+
+@media (min-width: 601px) and (max-width: 900px) {{
+    .players-grid {{
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }}
+}}
+</style>
+</head>
+<body>
+    <div class="players-grid">
+        {cards_html}
+    </div>
+</body>
+</html>
+"""
+
+# 3 cột trên điện thoại, 4 trên máy tính bảng,
+# 5 trên máy tính. Ước lượng chiều cao theo số hàng.
+if len(names) <= 0:
+    rows = 1
+else:
+    rows = (len(names) + 2) // 3
+
 components.html(
-    game_html,
-    height=610,
+    players_html,
+    height=max(100, rows * 95 + 15),
     scrolling=False
 )
 
+# ==================================================
+# CHÂN TRANG
+# ==================================================
+
+st.markdown("---")
+
 st.markdown(
-    "<p style='text-align:center;color:#bdb6e9;font-size:12px'>"
-    "🛸 UFO HACK NÃO · Chơi vui vẻ, thử thách trí thông minh!"
-    "</p>",
+    f"""
+    <div style="text-align:center;color:#c6c2ff;padding:15px;">
+        🛸 UFO HACK NÃO
+        <br>
+        🌌 Số ván đã chơi: {st.session_state.rounds}
+        <br>
+        ✨ Chúc bạn chơi vui vẻ!
+    </div>
+    """,
     unsafe_allow_html=True
 )
