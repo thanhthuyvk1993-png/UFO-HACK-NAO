@@ -262,11 +262,18 @@ with st.expander("✏️ ĐỔI TÊN NHÂN VẬT"):
     if players:
         options = {}
 
-        for player in players:
-            label = "{} (ID {})".format(
-                player["name"], player["id"]
-            )
-            options[label] = player["id"]
+       for player in players:
+                if isinstance(player, dict):
+                    player_id = player.get("id", "")
+                    player_name = player.get("name", "Người chơi")
+
+                else:
+                    continue
+
+                label = "{} (ID {})".format(
+                    player_name, player_id
+                )
+                options[label] = player_id
 
         selected_label = st.selectbox(
             "Chọn nhân vật",
