@@ -375,9 +375,36 @@ button:disabled {
 }
 
 #ufoButton {
+    position: absolute !important;
+    right: 16px !important;
+    bottom: 14px !important;
+    top: auto !important;
+    left: auto !important;
+    z-index: 5000 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1;
+    min-height: 46px;
+    padding: 13px 18px;
+    font-size: 16px;
     color: #07132b;
-    background: linear-gradient(120deg, #00d4ff, #3975ff);
-    border: none;
+    background: linear-gradient(120deg, #00e5ff, #3975ff);
+    border: 2px solid #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 0 18px #00d4ffcc;
+    text-shadow: none;
+}
+
+
+
+#ufoButton:hover {
+    filter: brightness(1.15);
+    transform: scale(1.03);
+}
+
+#ufoButton:disabled {
+    opacity: 0.75 !important;
+    cursor: not-allowed;
 }
 
 #scene {
