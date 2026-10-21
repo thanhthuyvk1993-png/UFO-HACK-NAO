@@ -8,6 +8,11 @@ st.set_page_config(
     layout="wide"
 )
 
+# ==========================================
+# BỘ CÂU HỎI
+# correct là vị trí đáp án đúng, bắt đầu từ 0
+# ==========================================
+
 QUESTIONS = {
     "Mức 1 - Đố vui, đố mẹo": [
         {
@@ -26,7 +31,7 @@ QUESTIONS = {
             "q": "Bạn vượt qua người đứng thứ hai trong cuộc đua. Bạn đứng thứ mấy?",
             "a": ["Thứ nhất", "Thứ hai", "Thứ ba", "Thứ tư"],
             "correct": 1,
-            "explain": "Bạn chiếm vị trí thứ hai của người đó."
+            "explain": "Bạn chiếm vị trí thứ hai."
         },
         {
             "q": "Cái gì có răng nhưng không biết nhai?",
@@ -95,7 +100,7 @@ QUESTIONS = {
             "q": "Gần mực thì đen, gần đèn thì ...",
             "a": ["Sáng", "Tối", "Nóng", "Lạnh"],
             "correct": 0,
-            "explain": "Câu tục ngữ nói về ảnh hưởng của môi trường."
+            "explain": "Gần mực thì đen, gần đèn thì sáng."
         },
         {
             "q": "Thất bại là mẹ thành ...",
@@ -113,7 +118,7 @@ QUESTIONS = {
             "q": "Một cây làm chẳng nên non, ba cây chụm lại nên hòn núi ...",
             "a": ["Đỏ", "Cao", "Thái Sơn", "Lớn"],
             "correct": 2,
-            "explain": "Câu tục ngữ đề cao tinh thần đoàn kết."
+            "explain": "Câu ca dao đề cao tinh thần đoàn kết."
         },
         {
             "q": "Câu nào khuyên chúng ta phải biết ơn?",
@@ -129,7 +134,7 @@ QUESTIONS = {
         {
             "q": "Không thầy đố mày làm ...",
             "a": ["Giàu", "Nên", "Quan", "Khôn"],
-            "correct": 3,
+            "correct": 1,
             "explain": "Không thầy đố mày làm nên."
         },
         {
@@ -233,7 +238,7 @@ QUESTIONS = {
             "q": "Đồ thị hàm số y = ax² (a khác 0) có hình dạng gì?",
             "a": ["Đường thẳng", "Đường tròn", "Parabol", "Hình chữ nhật"],
             "correct": 2,
-            "explain": "Đồ thị là một parabol."
+            "explain": "Đồ thị hàm số y = ax² là một parabol."
         },
         {
             "q": "Đường tròn bán kính 3 cm có đường kính bao nhiêu?",
@@ -245,6 +250,10 @@ QUESTIONS = {
 }
 
 QUESTIONS_JSON = json.dumps(QUESTIONS, ensure_ascii=False)
+
+# ==========================================
+# GAME HTML + CSS + JAVASCRIPT
+# ==========================================
 
 GAME_HTML = r"""
 <!DOCTYPE html>
@@ -264,7 +273,6 @@ body {
 }
 
 .game {
-    width: 100%;
     max-width: 1400px;
     margin: auto;
     padding: 10px;
@@ -324,16 +332,13 @@ body {
 
 .control {
     flex: 1;
-    min-width: 150px;
+    min-width: 140px;
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-label {
-    color: #d2dcff;
-    font-size: 13px;
-}
+label { color: #d2dcff; font-size: 13px; }
 
 input, select {
     width: 100%;
@@ -356,10 +361,10 @@ button {
     font-weight: bold;
 }
 
-button:hover { background: #68418a; }
+button:hover { filter: brightness(1.2); }
 
 button:disabled {
-    opacity: 0.5;
+    opacity: .5;
     cursor: not-allowed;
 }
 
@@ -370,8 +375,8 @@ button:disabled {
 }
 
 #ufoButton {
-    background: linear-gradient(120deg, #00d4ff, #3975ff);
     color: #07132b;
+    background: linear-gradient(120deg, #00d4ff, #3975ff);
     border: none;
 }
 
@@ -417,7 +422,6 @@ button:disabled {
 }
 
 .building {
-    position: relative;
     flex: 1;
     min-width: 25px;
     height: var(--height);
@@ -435,7 +439,6 @@ button:disabled {
 .window {
     height: 12px;
     background: #ffda69;
-    box-shadow: 0 0 8px #ffbb3c55;
 }
 
 .road {
@@ -507,7 +510,7 @@ button:disabled {
     font-size: 53px;
     z-index: 20;
     filter: drop-shadow(0 0 10px #6deaff);
-    transition: left 0.8s ease, top 0.8s ease;
+    transition: left .8s ease, top .8s ease;
     pointer-events: none;
 }
 
@@ -521,12 +524,12 @@ button:disabled {
     height: 250px;
     background: linear-gradient(#6df9ff99, #6df9ff20, transparent);
     clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
-    animation: pulse 0.5s infinite alternate;
+    animation: pulse .5s infinite alternate;
     pointer-events: none;
 }
 
 @keyframes pulse {
-    from { opacity: 0.5; }
+    from { opacity: .5; }
     to { opacity: 1; }
 }
 
@@ -542,7 +545,6 @@ button:disabled {
     width: 34px;
     height: 100px;
     transform-origin: center bottom;
-    transition: opacity 0.7s;
 }
 
 .head {
@@ -573,7 +575,7 @@ button:disabled {
     top: 19px;
     width: 23px;
     height: 38px;
-    border-radius: 7px 7px 3px 3px;
+    border-radius: 7px;
     background: var(--shirt);
 }
 
@@ -650,13 +652,16 @@ button:disabled {
 }
 
 .person.captured {
-    animation: abduct 1.8s forwards;
+    animation: abduct 1.5s forwards;
 }
 
 @keyframes abduct {
-    0% { opacity: 1; transform: translateY(0) scale(1); }
+    0% { opacity: 1; }
     50% { filter: brightness(2); }
-    100% { opacity: 0; transform: translateY(-220px) scale(.2); }
+    100% {
+        opacity: 0;
+        transform: translateY(-220px) scale(.2);
+    }
 }
 
 .nameTag {
@@ -771,40 +776,40 @@ button:disabled {
 
     <div class="controls">
         <div class="control">
-            <label for="difficulty">🎯 Chọn mức độ câu hỏi</label>
+            <label>🎯 Mức độ câu hỏi</label>
             <select id="difficulty">
-                <option value="Mức 1 - Đố vui, đố mẹo">🟢 Mức 1 - Đố vui, đố mẹo</option>
-                <option value="Mức 2 - Ca dao, tục ngữ">🟡 Mức 2 - Ca dao, tục ngữ</option>
+                <option value="Mức 1 - Đố vui, đố mẹo">🟢 Mức 1 - Đố vui</option>
+                <option value="Mức 2 - Ca dao, tục ngữ">🟡 Mức 2 - Ca dao tục ngữ</option>
                 <option value="Mức 3 - Toán lớp 9">🔴 Mức 3 - Toán lớp 9</option>
             </select>
         </div>
 
         <div class="control">
-            <label for="peopleCount">👥 Số người (1–100)</label>
+            <label>👥 Số người (1–100)</label>
             <input id="peopleCount" type="number" min="1" max="100" value="12">
         </div>
 
         <button id="applyPeople">Áp dụng</button>
 
         <div class="control">
-            <label for="renameSelect">Chọn người</label>
+            <label>Chọn người để đổi tên</label>
             <select id="renameSelect"></select>
         </div>
 
         <div class="control">
-            <label for="newName">Tên mới</label>
-            <input id="newName" type="text" maxlength="18" placeholder="Nhập tên...">
+            <label>Tên mới</label>
+            <input id="newName" maxlength="18" placeholder="Nhập tên...">
         </div>
 
         <button id="renameButton">✏️ Đổi tên</button>
         <button id="startButton" class="primary">🔊 BẮT ĐẦU GAME</button>
-        <button id="ufoButton">🛸 UFO BẮT NGƯỜI</button>
+        <button id="ufoButton" disabled>🛸 UFO BẮT NGƯỜI</button>
         <button id="resetButton">🔄 Chơi lại</button>
 
         <div class="control" style="max-width:180px">
-            <label for="volume">🔊 Âm lượng</label>
-            <input id="volume" type="range" min="0" max="100" value="45">
-            <span id="volumeLabel">45%</span>
+            <label>🔊 Âm lượng</label>
+            <input id="volume" type="range" min="0" max="100" value="70">
+            <span id="volumeLabel">70%</span>
         </div>
     </div>
 
@@ -832,8 +837,7 @@ button:disabled {
     </div>
 
     <div class="footer">
-        Chọn mức độ, bấm BẮT ĐẦU GAME, sau đó tự bấm UFO BẮT NGƯỜI
-        mỗi khi bạn muốn bắt người tiếp theo.
+        Bạn chủ động bấm UFO BẮT NGƯỜI. UFO không tự bắt người.
     </div>
 </div>
 
@@ -851,7 +855,6 @@ let people = [];
 let score = 0;
 let saved = 0;
 let round = 0;
-let currentTarget = null;
 let gameStarted = false;
 let quizOpen = false;
 let abductionInProgress = false;
@@ -865,6 +868,183 @@ const shirts = [
 const pantsColors = ["#202d46", "#353535", "#293b59", "#493b35"];
 const skinColors = ["#f4c7a1", "#d99a6c", "#b9754c", "#f0d1b0"];
 const hairColors = ["#211914", "#563a25", "#292929", "#a56a32"];
+
+// ==========================================
+// ÂM THANH
+// ==========================================
+
+let audioContext = null;
+let masterGain = null;
+let musicTimer = null;
+let noteIndex = 0;
+
+const melody = [
+    523.25, 659.25, 783.99, 659.25,
+    587.33, 698.46, 880.00, 698.46,
+    493.88, 587.33, 739.99, 587.33,
+    440.00, 554.37, 659.25, 554.37
+];
+
+const bassNotes = [130.81, 146.83, 123.47, 110.00];
+
+function setVolume() {
+    const value = Number($("volume").value);
+    $("volumeLabel").textContent = value + "%";
+
+    if (masterGain && audioContext) {
+        masterGain.gain.setTargetAtTime(
+            value / 100 * 0.8,
+            audioContext.currentTime,
+            0.06
+        );
+    }
+}
+
+function initAudio() {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioCtx) {
+        setMessage("Trình duyệt không hỗ trợ âm thanh.");
+        return;
+    }
+
+    if (!audioContext) {
+        audioContext = new AudioCtx();
+        masterGain = audioContext.createGain();
+
+        masterGain.gain.value =
+            Number($("volume").value) / 100 * 0.8;
+
+        masterGain.connect(audioContext.destination);
+        startMusic();
+    }
+
+    if (audioContext.state === "suspended") {
+        audioContext.resume();
+    }
+}
+
+function tone(
+    frequency,
+    duration,
+    type = "sine",
+    volume = 0.2,
+    delay = 0
+) {
+    if (!audioContext || !masterGain) return;
+
+    const startAt = audioContext.currentTime + delay;
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
+
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, startAt);
+
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(4200, startAt);
+
+    gain.gain.setValueAtTime(0.0001, startAt);
+    gain.gain.exponentialRampToValueAtTime(
+        Math.max(0.0002, volume),
+        startAt + 0.025
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        startAt + duration
+    );
+
+    oscillator.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+
+    oscillator.start(startAt);
+    oscillator.stop(startAt + duration + 0.03);
+}
+
+function playKick(delay = 0) {
+    if (!audioContext || !masterGain) return;
+
+    const startAt = audioContext.currentTime + delay;
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(120, startAt);
+    osc.frequency.exponentialRampToValueAtTime(45, startAt + 0.14);
+
+    gain.gain.setValueAtTime(0.22, startAt);
+    gain.gain.exponentialRampToValueAtTime(0.001, startAt + 0.16);
+
+    osc.connect(gain);
+    gain.connect(masterGain);
+
+    osc.start(startAt);
+    osc.stop(startAt + 0.17);
+}
+
+function startMusic() {
+    if (!audioContext) return;
+
+    clearInterval(musicTimer);
+    noteIndex = 0;
+
+    musicTimer = setInterval(() => {
+        if (!audioContext || audioContext.state !== "running") return;
+
+        const step = noteIndex % melody.length;
+        const note = melody[step];
+        const bass = bassNotes[Math.floor(step / 4) % bassNotes.length];
+
+        tone(note, 0.24, "triangle", 0.13);
+
+        if (step % 2 === 0) {
+            tone(note * 1.5, 0.17, "sine", 0.045, 0.035);
+        }
+
+        if (step % 4 === 0) {
+            tone(bass, 0.34, "triangle", 0.15);
+            playKick();
+        }
+
+        if (step % 4 === 2) {
+            tone(1100, 0.045, "square", 0.025);
+        }
+
+        noteIndex++;
+    }, 220);
+}
+
+function playUfoSound() {
+    if (!audioContext) return;
+
+    tone(440, 0.45, "sawtooth", 0.16);
+    tone(660, 0.5, "triangle", 0.12, 0.12);
+    tone(880, 0.5, "sine", 0.09, 0.25);
+}
+
+function playCorrectSound() {
+    if (!audioContext) return;
+
+    tone(523.25, 0.18, "triangle", 0.24, 0);
+    tone(659.25, 0.18, "triangle", 0.24, 0.13);
+    tone(783.99, 0.20, "triangle", 0.25, 0.26);
+    tone(1046.50, 0.42, "sine", 0.28, 0.40);
+    tone(1318.51, 0.28, "sine", 0.10, 0.48);
+}
+
+function playWrongSound() {
+    if (!audioContext) return;
+
+    tone(329.63, 0.22, "triangle", 0.22, 0);
+    tone(277.18, 0.28, "triangle", 0.23, 0.17);
+    tone(220.00, 0.38, "sine", 0.25, 0.36);
+}
+
+// ==========================================
+// GIAO DIỆN VÀ NHÂN VẬT
+// ==========================================
 
 function setMessage(text) {
     message.textContent = text;
@@ -888,9 +1068,7 @@ function createBuildings() {
             const win = document.createElement("div");
             win.className = "window";
 
-            if (Math.random() < 0.25) {
-                win.style.opacity = "0.15";
-            }
+            if (Math.random() < 0.25) win.style.opacity = "0.15";
 
             windows.appendChild(win);
         }
@@ -916,25 +1094,14 @@ function createPerson(index) {
         captured: false
     };
 
-    el.style.setProperty(
-        "--shirt",
-        shirts[Math.floor(Math.random() * shirts.length)]
-    );
-
-    el.style.setProperty(
-        "--pants",
-        pantsColors[Math.floor(Math.random() * pantsColors.length)]
-    );
-
-    el.style.setProperty(
-        "--skin",
-        skinColors[Math.floor(Math.random() * skinColors.length)]
-    );
-
-    el.style.setProperty(
-        "--hair",
-        hairColors[Math.floor(Math.random() * hairColors.length)]
-    );
+    el.style.setProperty("--shirt",
+        shirts[Math.floor(Math.random() * shirts.length)]);
+    el.style.setProperty("--pants",
+        pantsColors[Math.floor(Math.random() * pantsColors.length)]);
+    el.style.setProperty("--skin",
+        skinColors[Math.floor(Math.random() * skinColors.length)]);
+    el.style.setProperty("--hair",
+        hairColors[Math.floor(Math.random() * hairColors.length)]);
 
     el.innerHTML = `
         <div class="hair"></div>
@@ -950,6 +1117,7 @@ function createPerson(index) {
     `;
 
     el.querySelector(".nameTag").textContent = person.name;
+
     peopleLayer.appendChild(el);
     people.push(person);
     positionPerson(person);
@@ -971,6 +1139,7 @@ function positionPerson(person) {
 function refreshRenameSelect() {
     const select = $("renameSelect");
     const previous = select.value;
+
     select.innerHTML = "";
 
     people.filter(p => p.alive).forEach(person => {
@@ -996,7 +1165,6 @@ function createCity(count) {
     gameStarted = false;
     quizOpen = false;
     abductionInProgress = false;
-    currentTarget = null;
 
     peopleLayer.innerHTML = "";
     people = [];
@@ -1020,17 +1188,15 @@ function createCity(count) {
     $("ufoButton").disabled = true;
 
     setMessage("🌃 Đêm xuống... Hãy bấm BẮT ĐẦU GAME!");
-    moveUFO();
-}
-
-function moveUFO() {
-    ufo.style.left = (3 + Math.random() * 78) + "%";
-    ufo.style.top = (4 + Math.random() * 15) + "%";
+    ufo.style.left = "12%";
+    ufo.style.top = "8%";
 }
 
 function animatePeople() {
     people.forEach(person => {
         if (!person.alive || person.captured) return;
+
+        if (!gameStarted) return;
 
         person.x += person.speed * person.direction;
 
@@ -1050,10 +1216,12 @@ function animatePeople() {
     requestAnimationFrame(animatePeople);
 }
 
+// ==========================================
+// UFO BẮT NGƯỜI — CHỈ KHI BẠN BẤM NÚT
+// ==========================================
+
 function beginAbduction() {
-    if (!gameStarted || quizOpen || abductionInProgress) {
-        return;
-    }
+    if (!gameStarted || quizOpen || abductionInProgress) return;
 
     const living = people.filter(p => p.alive && !p.captured);
 
@@ -1068,7 +1236,6 @@ function beginAbduction() {
     $("ufoButton").disabled = true;
 
     const target = living[Math.floor(Math.random() * living.length)];
-    currentTarget = target;
     round++;
 
     ufo.style.left = Math.max(0, Math.min(85, target.x - 3)) + "%";
@@ -1076,7 +1243,8 @@ function beginAbduction() {
 
     beam.style.display = "block";
     setMessage("🛸 UFO đang bắt " + target.name + "!");
-    playSFX(660, 0.3);
+
+    playUfoSound();
 
     setTimeout(() => {
         if (!target.alive) {
@@ -1101,6 +1269,10 @@ function beginAbduction() {
         }, 1100);
     }, 800);
 }
+
+// ==========================================
+// HIỂN THỊ VÀ TRẢ LỜI CÂU HỎI
+// ==========================================
 
 function showQuestion(target) {
     gameStarted = false;
@@ -1141,14 +1313,14 @@ function showQuestion(target) {
                 $("quizResult").textContent =
                     "🎉 Chính xác! +10 điểm. " + question.explain;
 
-                playSFX(880, 0.45);
+                playCorrectSound();
             } else {
                 $("quizResult").textContent =
                     "❌ Chưa đúng. Đáp án đúng: " +
                     question.a[question.correct] +
                     ". " + question.explain;
 
-                playSFX(220, 0.4);
+                playWrongSound();
             }
 
             updateStats();
@@ -1176,7 +1348,7 @@ function showQuestion(target) {
                 $("ufoButton").disabled = false;
 
                 setMessage(
-                    "🌃 Hãy bấm 🛸 UFO BẮT NGƯỜI khi bạn muốn bắt tiếp!"
+                    "🌃 Bấm 🛸 UFO BẮT NGƯỜI khi bạn muốn bắt tiếp!"
                 );
             });
 
@@ -1189,16 +1361,9 @@ function showQuestion(target) {
     quiz.style.display = "block";
 }
 
-function resetGame() {
-    let count = parseInt($("peopleCount").value, 10);
-
-    if (!Number.isFinite(count)) count = 12;
-
-    count = Math.max(1, Math.min(100, count));
-    $("peopleCount").value = count;
-
-    createCity(count);
-}
+// ==========================================
+// CÁC NÚT ĐIỀU KHIỂN
+// ==========================================
 
 $("applyPeople").addEventListener("click", resetGame);
 $("resetButton").addEventListener("click", resetGame);
@@ -1215,7 +1380,7 @@ $("renameButton").addEventListener("click", () => {
     const person = people.find(p => p.id === id && p.alive);
 
     if (!person) {
-        setMessage("Người này không còn ở trên phố.");
+        setMessage("Người này không còn trên phố.");
         return;
     }
 
@@ -1229,15 +1394,11 @@ $("renameButton").addEventListener("click", () => {
     setMessage("✨ Đã đổi tên thành " + person.name + "!");
 });
 
-$("difficulty").addEventListener("change", () => {
-    setMessage("🎯 Đã chọn " + $("difficulty").value + ".");
-});
-
 $("startButton").addEventListener("click", () => {
     initAudio();
 
     if (quizOpen || abductionInProgress) {
-        setMessage("🧠 Hãy hoàn thành lượt bắt người hiện tại trước!");
+        setMessage("🧠 Hãy hoàn thành câu hỏi hiện tại trước!");
         return;
     }
 
@@ -1255,9 +1416,7 @@ $("startButton").addEventListener("click", () => {
         $("startButton").textContent = "⏸ TẠM DỪNG GAME";
         $("ufoButton").disabled = false;
 
-        setMessage(
-            "🛸 Game bắt đầu! Bạn hãy tự bấm nút UFO BẮT NGƯỜI."
-        );
+        setMessage("🛸 Game bắt đầu! Hãy tự bấm UFO BẮT NGƯỜI.");
     }
 });
 
@@ -1280,106 +1439,18 @@ $("ufoButton").addEventListener("click", () => {
     beginAbduction();
 });
 
-let audioContext = null;
-let masterGain = null;
-let musicTimer = null;
-let noteIndex = 0;
-
-function setVolume() {
-    const value = Number($("volume").value);
-    $("volumeLabel").textContent = value + "%";
-
-    if (masterGain && audioContext) {
-        masterGain.gain.setTargetAtTime(
-            value / 100 * 0.45,
-            audioContext.currentTime,
-            0.08
-        );
-    }
-}
-
-function initAudio() {
-    if (audioContext) {
-        if (audioContext.state === "suspended") {
-            audioContext.resume();
-        }
-        return;
-    }
-
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-
-    if (!AudioCtx) {
-        setMessage("Trình duyệt không hỗ trợ âm thanh.");
-        return;
-    }
-
-    audioContext = new AudioCtx();
-
-    masterGain = audioContext.createGain();
-    masterGain.gain.value = Number($("volume").value) / 100 * 0.45;
-    masterGain.connect(audioContext.destination);
-
-    startMusic();
-}
-
-function tone(frequency, duration, type = "sawtooth", volume = 0.15) {
-    if (!audioContext || !masterGain) return;
-
-    const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
-
-    oscillator.type = type;
-    oscillator.frequency.value = frequency;
-
-    gain.gain.setValueAtTime(volume, audioContext.currentTime);
-    gain.gain.exponentialRampToValueAtTime(
-        0.001,
-        audioContext.currentTime + duration
-    );
-
-    oscillator.connect(gain);
-    gain.connect(masterGain);
-
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + duration);
-}
-
-function startMusic() {
-    if (!audioContext) return;
-
-    clearInterval(musicTimer);
-
-    const melody = [
-        110, 165, 220, 165,
-        130, 196, 261, 196,
-        98, 147, 196, 147,
-        123, 185, 247, 185
-    ];
-
-    musicTimer = setInterval(() => {
-        if (!audioContext || audioContext.state !== "running") return;
-
-        const frequency = melody[noteIndex % melody.length];
-
-        tone(frequency, 0.25, "sawtooth", 0.13);
-        tone(frequency * 2, 0.15, "square", 0.035);
-
-        if (noteIndex % 4 === 0) {
-            tone(55, 0.32, "triangle", 0.12);
-        }
-
-        noteIndex++;
-    }, 260);
-}
-
-function playSFX(frequency = 600, duration = 0.3) {
-    if (!audioContext) return;
-
-    tone(frequency, duration, "square", 0.18);
-    tone(frequency * 1.5, duration * 0.7, "triangle", 0.1);
-}
-
 $("volume").addEventListener("input", setVolume);
+
+function resetGame() {
+    let count = parseInt($("peopleCount").value, 10);
+
+    if (!Number.isFinite(count)) count = 12;
+
+    count = Math.max(1, Math.min(100, count));
+    $("peopleCount").value = count;
+
+    createCity(count);
+}
 
 createBuildings();
 createCity(12);
