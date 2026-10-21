@@ -100,12 +100,14 @@ button:hover{filter:brightness(1.2)}button:disabled{opacity:.5;cursor:not-allowe
 .person.captured{animation:abduct 1.5s forwards}
 @keyframes abduct{0%{opacity:1}50%{filter:brightness(2)}100%{opacity:0;translate:0 -220px;scale:.2}}
 .nameTag{position:absolute;top:90px;left:50%;transform:translateX(-50%) scaleX(var(--name-direction,1));color:white;font-size:10px;white-space:nowrap;text-shadow:1px 1px 3px black;pointer-events:none}
-#message{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:30;width:max-content;max-width:90%;padding:9px 15px;border-radius:20px;background:#080d1ddd;border:1px solid #ffe66d;text-align:center;font-size:13px;font-weight:bold}
+#message{position:absolute;top:68px;left:50%;transform:translateX(-50%);z-index:30;width:max-content;max-width:90%;padding:9px 15px;border-radius:20px;background:#080d1ddd;border:1px solid #ffe66d;text-align:center;font-size:13px;font-weight:bold}
+#ufoButton{position:absolute;top:12px;left:12px;z-index:50;max-width:calc(100% - 24px);padding:10px 12px;color:#160d20;background:linear-gradient(120deg,#ffe66d,#ff9f1c);border:2px solid #fff0a8;box-shadow:0 0 16px #ffe66d99;font-size:14px;font-weight:900}
+#ufoButton:disabled{opacity:.8;color:#554b2a;filter:saturate(.65)}
 #quiz{display:none;position:absolute;z-index:1000;left:50%;top:50%;transform:translate(-50%,-50%);width:min(520px,calc(100% - 20px));max-height:calc(100% - 20px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:20px;background:#10142af7;border:2px solid #ffe66d;border-radius:17px;box-shadow:0 0 30px #55eaff77;color:white;text-align:center}
 #quiz h2{margin:0 0 10px;color:#ffe66d}#question{font-size:17px;line-height:1.5;margin:14px 0;overflow-wrap:anywhere}
 .answers{display:grid;grid-template-columns:1fr 1fr;gap:9px}.answers button{min-height:46px;background:#202d50;border-color:#657fc2;color:white;white-space:normal;overflow-wrap:anywhere}
 #quizResult{margin-top:12px;line-height:1.5;color:#ffe66d;font-weight:bold}.footer{padding:12px;text-align:center;color:#aab9e5;font-size:12px}
-@media(max-width:600px){.game{padding:6px}.header h1{font-size:27px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px}.control{min-width:0;width:100%}.controls>button{width:100%;min-width:0;padding:10px 6px;font-size:14px}.stat{min-width:calc(50% - 8px)}#scene{height:500px;min-height:450px}#ufo{font-size:42px;width:75px}#quiz{padding:12px}#question{font-size:16px}.answers{grid-template-columns:1fr}}
+@media(max-width:600px){#ufoButton{top:10px;left:10px;padding:9px 10px;font-size:12px}#message{top:65px;max-width:calc(100% - 20px)}.game{padding:6px}.header h1{font-size:27px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px}.control{min-width:0;width:100%}.controls>button{width:100%;min-width:0;padding:10px 6px;font-size:14px}.stat{min-width:calc(50% - 8px)}#scene{height:500px;min-height:450px}#ufo{font-size:42px;width:75px}#quiz{padding:12px}#question{font-size:16px}.answers{grid-template-columns:1fr}}
 @media(max-width:360px){.controls{grid-template-columns:1fr}#scene{height:460px}}
 </style></head><body><div class="game">
 <div class="header"><h1>🛸 UFO HACK NÃO 👽</h1><p>Thành phố ban đêm — bạn điều khiển UFO — thử thách trí tuệ!</p></div>
