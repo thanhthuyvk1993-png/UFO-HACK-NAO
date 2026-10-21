@@ -1,5 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
+import json
 
 st.set_page_config(
     page_title="UFO HACK NÃO",
@@ -7,20 +8,252 @@ st.set_page_config(
     layout="wide"
 )
 
-st.markdown("""
-<style>
-    html, body, [data-testid="stAppViewContainer"] {
-        background: #070b19;
-    }
-    .block-container {
-        padding-top: 1rem;
-        max-width: 1500px;
-    }
-    header, footer, #MainMenu {
-        visibility: hidden;
-    }
-</style>
-""", unsafe_allow_html=True)
+# ==========================================
+# BỘ CÂU HỎI
+# correct là vị trí đáp án đúng, bắt đầu từ 0
+# ==========================================
+
+QUESTIONS = {
+    "Mức 1 - Đố vui, đố mẹo": [
+        {
+            "q": "Một năm có bao nhiêu tháng có 28 ngày?",
+            "a": ["1 tháng", "2 tháng", "6 tháng", "12 tháng"],
+            "correct": 3,
+            "explain": "Cả 12 tháng đều có ít nhất 28 ngày."
+        },
+        {
+            "q": "Cái gì càng đào đi thì càng lớn?",
+            "a": ["Cái túi", "Cái hố", "Ngọn núi", "Cái cây"],
+            "correct": 1,
+            "explain": "Càng đào đất đi thì cái hố càng lớn."
+        },
+        {
+            "q": "Bạn vượt qua người đứng thứ hai trong cuộc đua. Bạn đứng thứ mấy?",
+            "a": ["Thứ nhất", "Thứ hai", "Thứ ba", "Thứ tư"],
+            "correct": 1,
+            "explain": "Bạn chiếm vị trí thứ hai."
+        },
+        {
+            "q": "Cái gì có răng nhưng không biết nhai?",
+            "a": ["Con cá", "Cái lược", "Con chó", "Cái bát"],
+            "correct": 1,
+            "explain": "Đó là cái lược."
+        },
+        {
+            "q": "Có 5 quả táo, bạn lấy đi 2 quả. Bạn có mấy quả?",
+            "a": ["3 quả", "2 quả", "5 quả", "7 quả"],
+            "correct": 1,
+            "explain": "Bạn lấy 2 quả nên bạn có 2 quả."
+        },
+        {
+            "q": "Cái gì có cổ nhưng không có đầu?",
+            "a": ["Con người", "Cái chai", "Con ngựa", "Cái bàn"],
+            "correct": 1,
+            "explain": "Đó là cái chai."
+        },
+        {
+            "q": "Bạn có thể cầm gì bằng tay trái nhưng không thể cầm bằng tay phải?",
+            "a": ["Cái cốc", "Khuỷu tay phải", "Quyển sách", "Cái bút"],
+            "correct": 1,
+            "explain": "Bạn không thể dùng tay phải cầm chính khuỷu tay phải."
+        },
+        {
+            "q": "Cái gì luôn đến nhưng không bao giờ trở thành hôm qua?",
+            "a": ["Ngày mai", "Hôm nay", "Hôm qua", "Buổi sáng"],
+            "correct": 0,
+            "explain": "Ngày mai đến thì lại trở thành hôm nay."
+        },
+        {
+            "q": "Một căn phòng có 4 góc, mỗi góc có một con mèo. Có bao nhiêu con mèo?",
+            "a": ["2", "4", "8", "16"],
+            "correct": 1,
+            "explain": "Có tổng cộng 4 con mèo."
+        },
+        {
+            "q": "Cái gì có mặt và hai kim nhưng không có tay?",
+            "a": ["Robot", "Đồng hồ", "Con người", "Cái quạt"],
+            "correct": 1,
+            "explain": "Đó là đồng hồ."
+        }
+    ],
+
+    "Mức 2 - Ca dao, tục ngữ": [
+        {
+            "q": "Có công mài sắt, có ngày nên ...",
+            "a": ["Kim", "Dao", "Kéo", "Búa"],
+            "correct": 0,
+            "explain": "Có công mài sắt, có ngày nên kim."
+        },
+        {
+            "q": "Uống nước nhớ ...",
+            "a": ["Cây", "Nguồn", "Sông", "Suối"],
+            "correct": 1,
+            "explain": "Uống nước nhớ nguồn."
+        },
+        {
+            "q": "Lá lành đùm lá ...",
+            "a": ["Đỏ", "Xanh", "Rách", "Vàng"],
+            "correct": 2,
+            "explain": "Lá lành đùm lá rách."
+        },
+        {
+            "q": "Gần mực thì đen, gần đèn thì ...",
+            "a": ["Sáng", "Tối", "Nóng", "Lạnh"],
+            "correct": 0,
+            "explain": "Gần mực thì đen, gần đèn thì sáng."
+        },
+        {
+            "q": "Thất bại là mẹ thành ...",
+            "a": ["Công", "Danh", "Đạt", "Tài"],
+            "correct": 0,
+            "explain": "Thất bại là mẹ thành công."
+        },
+        {
+            "q": "Ăn quả nhớ kẻ trồng ...",
+            "a": ["Hoa", "Cây", "Đất", "Rừng"],
+            "correct": 1,
+            "explain": "Ăn quả nhớ kẻ trồng cây."
+        },
+        {
+            "q": "Một cây làm chẳng nên non, ba cây chụm lại nên hòn núi ...",
+            "a": ["Đỏ", "Cao", "Thái Sơn", "Lớn"],
+            "correct": 2,
+            "explain": "Câu ca dao đề cao tinh thần đoàn kết."
+        },
+        {
+            "q": "Câu nào khuyên chúng ta phải biết ơn?",
+            "a": [
+                "Có chí thì nên",
+                "Uống nước nhớ nguồn",
+                "Đi một ngày đàng",
+                "Tốt gỗ hơn tốt nước sơn"
+            ],
+            "correct": 1,
+            "explain": "Uống nước nhớ nguồn khuyên ta nhớ ơn cội nguồn."
+        },
+        {
+            "q": "Không thầy đố mày làm ...",
+            "a": ["Giàu", "Nên", "Quan", "Khôn"],
+            "correct": 1,
+            "explain": "Không thầy đố mày làm nên."
+        },
+        {
+            "q": "Một mặt người bằng mười mặt ...",
+            "a": ["Đất", "Vàng", "Bạc", "Ngọc"],
+            "correct": 1,
+            "explain": "Câu tục ngữ đề cao giá trị con người."
+        }
+    ],
+
+    "Mức 3 - Toán lớp 9": [
+        {
+            "q": "Giải phương trình x² - 5x + 6 = 0.",
+            "a": [
+                "x = 1 hoặc x = 6",
+                "x = 2 hoặc x = 3",
+                "x = -2 hoặc x = -3",
+                "x = 0 hoặc x = 5"
+            ],
+            "correct": 1,
+            "explain": "(x - 2)(x - 3) = 0 nên x = 2 hoặc x = 3."
+        },
+        {
+            "q": "Tính √81.",
+            "a": ["7", "8", "9", "10"],
+            "correct": 2,
+            "explain": "√81 = 9."
+        },
+        {
+            "q": "Giải phương trình 2x + 6 = 0.",
+            "a": ["x = 3", "x = -3", "x = 6", "x = -6"],
+            "correct": 1,
+            "explain": "2x = -6 nên x = -3."
+        },
+        {
+            "q": "Nếu y = 2x + 1, khi x = 3 thì y bằng bao nhiêu?",
+            "a": ["5", "6", "7", "8"],
+            "correct": 2,
+            "explain": "y = 2 × 3 + 1 = 7."
+        },
+        {
+            "q": "Phương trình x² = 16 có nghiệm nào?",
+            "a": ["Chỉ x = 4", "Chỉ x = -4", "x = ±4", "x = 16"],
+            "correct": 2,
+            "explain": "Hai nghiệm là x = 4 và x = -4."
+        },
+        {
+            "q": "Tính √25 + √9.",
+            "a": ["8", "34", "16", "2"],
+            "correct": 0,
+            "explain": "5 + 3 = 8."
+        },
+        {
+            "q": "Đường thẳng y = 3x - 2 có hệ số góc bằng bao nhiêu?",
+            "a": ["-2", "2", "3", "-3"],
+            "correct": 2,
+            "explain": "Hệ số góc là 3."
+        },
+        {
+            "q": "Tam giác vuông có hai cạnh góc vuông 3 và 4. Cạnh huyền bằng bao nhiêu?",
+            "a": ["5", "6", "7", "8"],
+            "correct": 0,
+            "explain": "Theo định lý Pythagore, cạnh huyền bằng 5."
+        },
+        {
+            "q": "Giải phương trình x² - 9 = 0.",
+            "a": ["x = 3", "x = -3", "x = ±3", "x = 9"],
+            "correct": 2,
+            "explain": "Hai nghiệm là x = 3 và x = -3."
+        },
+        {
+            "q": "Nếu sin A = 1/2 và A là góc nhọn thì A bằng bao nhiêu?",
+            "a": ["30°", "45°", "60°", "90°"],
+            "correct": 0,
+            "explain": "sin 30° = 1/2."
+        },
+        {
+            "q": "Giải hệ x + y = 7 và x - y = 1.",
+            "a": [
+                "x = 3, y = 4",
+                "x = 4, y = 3",
+                "x = 5, y = 2",
+                "x = 6, y = 1"
+            ],
+            "correct": 1,
+            "explain": "Cộng hai phương trình được 2x = 8, nên x = 4, y = 3."
+        },
+        {
+            "q": "Biệt thức Δ của x² - 4x + 4 = 0 bằng bao nhiêu?",
+            "a": ["0", "4", "8", "16"],
+            "correct": 0,
+            "explain": "Δ = 16 - 16 = 0."
+        },
+        {
+            "q": "Tính √(49/64).",
+            "a": ["7/8", "8/7", "7/64", "49/8"],
+            "correct": 0,
+            "explain": "√(49/64) = 7/8."
+        },
+        {
+            "q": "Đồ thị hàm số y = ax² (a khác 0) có hình dạng gì?",
+            "a": ["Đường thẳng", "Đường tròn", "Parabol", "Hình chữ nhật"],
+            "correct": 2,
+            "explain": "Đồ thị hàm số y = ax² là một parabol."
+        },
+        {
+            "q": "Đường tròn bán kính 3 cm có đường kính bao nhiêu?",
+            "a": ["3 cm", "6 cm", "9 cm", "12 cm"],
+            "correct": 1,
+            "explain": "Đường kính bằng hai lần bán kính: 6 cm."
+        }
+    ]
+}
+
+QUESTIONS_JSON = json.dumps(QUESTIONS, ensure_ascii=False)
+
+# ==========================================
+# GAME HTML + CSS + JAVASCRIPT
+# ==========================================
 
 GAME_HTML = r"""
 <!DOCTYPE html>
@@ -30,1044 +263,1229 @@ GAME_HTML = r"""
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
     margin: 0;
-    background: #070b19;
-    color: white;
+    background: #080d1b;
+    color: #ffe66d;
     font-family: Arial, sans-serif;
 }
 
-#game-container {
-    position: relative;
+.game {
+    max-width: 1400px;
+    margin: auto;
+    padding: 10px;
+}
+
+.header {
+    text-align: center;
+    padding: 12px;
+    border: 2px solid #ffcf33;
+    border-radius: 15px;
+    background: linear-gradient(120deg, #101735, #24104b);
+    box-shadow: 0 0 18px #ffcf3340;
+}
+
+.header h1 {
+    margin: 5px;
+    font-size: clamp(27px, 5vw, 43px);
+    text-shadow: 0 0 15px #ffae00;
+}
+
+.header p { color: #d5ddff; }
+
+.stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.stat {
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #5c70b9;
+    border-radius: 12px;
+    background: #111a36;
+}
+
+.stat b {
+    display: block;
+    font-size: 22px;
+    margin-bottom: 4px;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: end;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #101832;
+    border: 1px solid #334779;
+    border-radius: 12px;
+}
+
+.control {
+    flex: 1;
+    min-width: 140px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+label { color: #d2dcff; font-size: 13px; }
+
+input, select {
     width: 100%;
-    height: 620px;
-    overflow: hidden;
-    border: 2px solid #607bd4;
-    border-radius: 16px;
-    background: linear-gradient(
-        #0c1430 0%,
-        #17264b 58%,
-        #89909f 58%,
-        #252d3c 64%,
-        #202735 100%
-    );
+    padding: 10px;
+    border: 1px solid #6478bd;
+    border-radius: 8px;
+    background: #080e20;
+    color: white;
 }
 
-#sky {
-    position: absolute;
-    inset: 0 0 42% 0;
-    overflow: hidden;
+input[type=range] { accent-color: #ffd43b; }
+
+button {
+    padding: 10px 13px;
+    border: 1px solid #ffdf5d;
+    border-radius: 9px;
+    color: #fff4ba;
+    background: #38234e;
+    cursor: pointer;
+    font-weight: bold;
 }
 
-.star {
+button:hover { filter: brightness(1.2); }
+
+button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.primary {
+    color: #160d20;
+    background: linear-gradient(120deg, #f7b928, #ff7a18);
+    border: none;
+}
+
+#ufoButton {
+    color: #07132b;
+    background: linear-gradient(120deg, #00d4ff, #3975ff);
+    border: none;
+}
+
+#scene {
+    position: relative;
+    height: 560px;
+    overflow: hidden;
+    border: 2px solid #5e78c6;
+    border-radius: 15px;
+    background: #10162e;
+    isolation: isolate;
+}
+
+.sky {
     position: absolute;
-    width: 3px;
-    height: 3px;
-    background: white;
-    border-radius: 50%;
+    inset: 0 0 42%;
+    background:
+        radial-gradient(circle at 20% 20%, white 0 1px, transparent 2px),
+        radial-gradient(circle at 65% 17%, white 0 1px, transparent 2px),
+        radial-gradient(circle at 83% 30%, #a9d4ff 0 1px, transparent 2px),
+        linear-gradient(#080e29, #26365d);
+    background-size: 100px 80px, 130px 110px, 160px 120px, auto;
 }
 
 .moon {
     position: absolute;
-    right: 12%;
     top: 25px;
+    right: 11%;
     width: 45px;
     height: 45px;
     border-radius: 50%;
-    background: #fff2a3;
-    box-shadow: 0 0 25px #ffe9a0;
+    background: #fff2b0;
+    box-shadow: 0 0 30px #ffe9a0;
+}
+
+.buildings {
+    position: absolute;
+    inset: 90px 0 38%;
+    display: flex;
+    align-items: end;
+    gap: 5px;
+    padding: 0 5px;
 }
 
 .building {
-    position: absolute;
-    bottom: 0;
-    background: #1b2946;
-    border: 1px solid #526183;
+    flex: 1;
+    min-width: 25px;
+    height: var(--height);
+    background: linear-gradient(90deg, #17213d, #263656);
+    border: 1px solid #40547a;
+}
+
+.windows {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+    padding: 8px 5px;
 }
 
 .window {
-    position: absolute;
-    width: 17%;
-    height: 10px;
-    background: #ffdf69;
-    box-shadow: 0 0 5px #ffcf43;
+    height: 12px;
+    background: #ffda69;
 }
 
-#sidewalk {
+.road {
     position: absolute;
-    left: 0;
-    right: 0;
-    top: 56%;
-    height: 34px;
-    background: #89909f;
-    border-bottom: 4px solid #555f70;
-}
-
-#road {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 62%;
     bottom: 0;
-    background: linear-gradient(#3c4351, #202735);
-}
-
-.lane {
-    position: absolute;
     left: 0;
     right: 0;
-    top: 81%;
+    height: 43%;
+    background: linear-gradient(#424957, #222936);
+    border-top: 9px solid #858b9a;
+}
+
+.sidewalk {
+    position: absolute;
+    top: 56%;
+    left: 0;
+    right: 0;
+    height: 6%;
+    background: repeating-linear-gradient(
+        90deg, #858b9a 0 60px, #636b7c 60px 63px
+    );
+}
+
+.road-line {
+    position: absolute;
+    top: 80%;
+    left: 0;
+    right: 0;
     height: 4px;
     background: repeating-linear-gradient(
-        90deg,
-        #ffe6a0 0 46px,
-        transparent 46px 86px
+        90deg, #ffe59b 0 45px, transparent 45px 85px
     );
+}
+
+.lamp {
+    position: absolute;
+    top: 20%;
+    width: 5px;
+    height: 40%;
+    background: #66738c;
+}
+
+.lamp:before {
+    content: "";
+    position: absolute;
+    width: 35px;
+    height: 5px;
+    background: #66738c;
+}
+
+.lamp:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 25px;
+    width: 13px;
+    height: 10px;
+    background: #ffe6a0;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #ffe6a0;
 }
 
 #ufo {
     position: absolute;
-    right: 9%;
-    top: 60px;
-    font-size: 40px;
-    z-index: 6;
-    filter: drop-shadow(0 0 12px #68eaff);
-    animation: hoverUfo 2s ease-in-out infinite;
+    top: 8%;
+    left: 12%;
+    width: 100px;
+    text-align: center;
+    font-size: 53px;
+    z-index: 20;
+    filter: drop-shadow(0 0 10px #6deaff);
+    transition: left .8s ease, top .8s ease;
+    pointer-events: none;
 }
 
-@keyframes hoverUfo {
-    50% {
-        transform: translateY(-9px) rotate(-3deg);
-    }
-}
-
-#beam {
+.beam {
     display: none;
     position: absolute;
-    top: 35px;
+    top: 60px;
     left: 50%;
     transform: translateX(-50%);
-    width: 65px;
-    height: 110px;
-    background: linear-gradient(#7df9ff99, #7df9ff05);
+    width: 100px;
+    height: 250px;
+    background: linear-gradient(#6df9ff99, #6df9ff20, transparent);
     clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
-    z-index: -1;
+    animation: pulse .5s infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes pulse {
+    from { opacity: .5; }
+    to { opacity: 1; }
+}
+
+#peopleLayer {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
 }
 
 .person {
     position: absolute;
-    z-index: 4;
-    width: 36px;
-    height: 85px;
-    text-align: center;
-    transform: translateX(-50%);
+    width: 34px;
+    height: 100px;
+    transform-origin: center bottom;
 }
 
-.person .hair {
-    position: relative;
-    top: 4px;
-    margin: auto;
-    width: 16px;
-    height: 6px;
-    background: #38291f;
-    border-radius: 6px 6px 0 0;
-    z-index: 1;
+.head {
+    position: absolute;
+    left: 10px;
+    top: 0;
+    width: 17px;
+    height: 19px;
+    border-radius: 50%;
+    background: var(--skin);
+    border: 1px solid #47312a;
 }
 
-.person .head {
-    width: 16px;
-    height: 17px;
-    border-radius: 45%;
-    background: #f2c49a;
-    margin: auto;
-    border: 1px solid #8d6147;
+.hair {
+    position: absolute;
+    z-index: 2;
+    left: 9px;
+    top: -2px;
+    width: 19px;
+    height: 8px;
+    border-radius: 9px;
+    background: var(--hair);
 }
 
-.person .body {
-    width: 22px;
-    height: 28px;
-    margin: 0 auto;
-    border-radius: 6px 6px 3px 3px;
+.body {
+    position: absolute;
+    left: 7px;
+    top: 19px;
+    width: 23px;
+    height: 38px;
+    border-radius: 7px;
     background: var(--shirt);
 }
 
-.person .legs {
-    display: flex;
-    justify-content: center;
-    gap: 4px;
+.arm {
+    position: absolute;
+    top: 23px;
+    width: 7px;
+    height: 31px;
+    border-radius: 6px;
+    background: var(--skin);
+    transform-origin: top;
 }
 
-.person .legs span {
-    width: 8px;
-    height: 24px;
-    background: #263044;
-    border-radius: 0 0 5px 5px;
+.arm.left {
+    left: 4px;
+    animation: armL .45s infinite alternate;
 }
 
-.person .label {
-    font-size: 9px;
-    font-weight: bold;
-    text-shadow: 0 1px 3px black;
-    white-space: nowrap;
+.arm.right {
+    right: 3px;
+    animation: armR .45s infinite alternate;
+}
+
+.leg {
+    position: absolute;
+    top: 53px;
+    width: 9px;
+    height: 37px;
+    border-radius: 5px;
+    background: var(--pants);
+    transform-origin: top;
+}
+
+.leg.left {
+    left: 9px;
+    animation: legL .4s infinite alternate;
+}
+
+.leg.right {
+    left: 20px;
+    animation: legR .4s infinite alternate;
+}
+
+.shoe {
+    position: absolute;
+    bottom: 5px;
+    width: 13px;
+    height: 6px;
+    border-radius: 5px;
+    background: #111;
+}
+
+.shoe.left { left: 5px; }
+.shoe.right { left: 17px; }
+
+@keyframes legL {
+    from { transform: rotate(-22deg); }
+    to { transform: rotate(22deg); }
+}
+
+@keyframes legR {
+    from { transform: rotate(22deg); }
+    to { transform: rotate(-22deg); }
+}
+
+@keyframes armL {
+    from { transform: rotate(20deg); }
+    to { transform: rotate(-20deg); }
+}
+
+@keyframes armR {
+    from { transform: rotate(-20deg); }
+    to { transform: rotate(20deg); }
 }
 
 .person.captured {
-    animation: abduct 0.8s ease-in forwards;
+    animation: abduct 1.5s forwards;
 }
 
 @keyframes abduct {
-    to {
-        transform: translate(-50%, -140px) scale(0.2);
+    0% { opacity: 1; }
+    50% { filter: brightness(2); }
+    100% {
         opacity: 0;
+        transform: translateY(-220px) scale(.2);
     }
 }
 
-#topbar {
+.nameTag {
     position: absolute;
-    top: 12px;
-    left: 12px;
-    z-index: 10;
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.pill {
-    padding: 8px 12px;
-    border: 1px solid #657cc3;
-    border-radius: 20px;
-    background: #0b122be8;
-    font-size: 13px;
-    font-weight: bold;
-}
-
-#status {
-    position: absolute;
-    top: 58px;
-    left: 12px;
-    z-index: 10;
-    color: #ffe45c;
-    font-size: 13px;
-    font-weight: bold;
-    text-shadow: 0 2px 5px black;
-    max-width: 65%;
-}
-
-#ufo-catch-btn {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 20;
-    padding: 12px 16px;
-    border: 2px solid #ffe34d;
-    border-radius: 25px;
-    background: linear-gradient(135deg, #6554ff, #251c64);
+    top: 90px;
+    left: 50%;
+    transform: translateX(-50%);
     color: white;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 0 15px #ffe34d88;
+    font-size: 10px;
+    white-space: nowrap;
+    text-shadow: 1px 1px 3px black;
 }
 
-#ufo-catch-btn:hover {
-    background: linear-gradient(135deg, #ffca28, #ff7b00);
-}
-
-#ufo-catch-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-#question-card {
+#message {
     position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 30;
+    width: max-content;
+    max-width: 90%;
+    padding: 9px 15px;
+    border-radius: 20px;
+    background: #080d1ddd;
+    border: 1px solid #ffe66d;
+    text-align: center;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+#quiz {
+    display: none;
+    position: absolute;
+    z-index: 1000;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: min(520px, calc(100% - 24px));
-    padding: 18px;
-    border: 2px solid #ffdf48;
-    border-radius: 20px;
-    background: #101426f5;
-    box-shadow: 0 0 28px #ffd83c66;
+    width: min(520px, 94%);
+    max-height: 85%;
+    overflow-y: auto;
+    padding: 20px;
+    background: #10142af7;
+    border: 2px solid #ffe66d;
+    border-radius: 17px;
+    box-shadow: 0 0 30px #55eaff77;
+    color: white;
     text-align: center;
 }
 
-#question-card h2 {
-    font-size: 24px;
-    color: #ffe34d;
-    margin: 0 0 12px;
-}
-
-#question-meta {
-    font-size: 14px;
-    line-height: 1.5;
-    margin-bottom: 14px;
+#quiz h2 {
+    margin: 0 0 10px;
+    color: #ffe66d;
 }
 
 #question {
     font-size: 17px;
-    line-height: 1.45;
-    margin-bottom: 16px;
+    line-height: 1.5;
+    margin: 14px 0;
 }
 
-#answers {
+.answers {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 9px;
 }
 
-.answer {
+.answers button {
     min-height: 46px;
-    padding: 10px;
-    border: 1px solid #6682d0;
-    border-radius: 10px;
     background: #202d50;
+    border-color: #657fc2;
     color: white;
-    font-weight: bold;
-    font-size: 14px;
-    cursor: pointer;
 }
 
-.answer:hover:not(:disabled) {
-    background: #354a7b;
-}
-
-#feedback {
-    min-height: 24px;
-    font-weight: bold;
+#quizResult {
     margin-top: 12px;
-}
-
-#next-btn, #start-btn, #restart-btn,
-#start-overlay-btn {
-    border: 0;
-    border-radius: 9px;
-    padding: 11px 17px;
-    font-weight: bold;
-    cursor: pointer;
-    background: #ffdf48;
-    color: #15192a;
-    margin: 5px;
-}
-
-#controls {
-    position: absolute;
-    left: 12px;
-    bottom: 10px;
-    z-index: 12;
-    display: flex;
-    gap: 7px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-#controls label {
-    font-size: 12px;
-    background: #101426ed;
-    padding: 8px;
-    border-radius: 8px;
-}
-
-#controls select {
-    margin-left: 5px;
-    max-width: 125px;
-}
-
-#start-screen {
-    position: absolute;
-    z-index: 25;
-    inset: 0;
-    background: #080d20c9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 20px;
-}
-
-#start-box {
-    max-width: 450px;
-    background: #101426f5;
-    border: 2px solid #ffdf48;
-    border-radius: 20px;
-    padding: 24px;
-    box-shadow: 0 0 25px #ffdf4844;
-}
-
-#start-box h1 {
-    color: #ffe34d;
-}
-
-#start-box p {
     line-height: 1.5;
+    color: #ffe66d;
+    font-weight: bold;
 }
 
-#mute-btn {
-    position: absolute;
-    bottom: 12px;
-    right: 12px;
-    z-index: 15;
-    border: 1px solid #8094d6;
-    border-radius: 18px;
-    padding: 8px 12px;
-    background: #111a36;
-    color: white;
-    cursor: pointer;
+.footer {
+    padding: 12px;
+    text-align: center;
+    color: #aab9e5;
+    font-size: 12px;
 }
 
 @media(max-width:600px) {
-    #game-container {
-        height: 650px;
-    }
-
-    #question-card {
-        padding: 12px;
-    }
-
-    #question-card h2 {
-        font-size: 21px;
-    }
-
-    #question {
-        font-size: 15px;
-    }
-
-    #ufo-catch-btn {
-        font-size: 11px;
-        padding: 9px;
-        top: 50px;
-    }
-
-    #topbar {
-        top: 10px;
-    }
-
-    #status {
-        top: 92px;
-    }
-
-    .answer {
-        font-size: 12px;
-    }
+    #scene { height: 480px; }
+    #ufo { font-size: 42px; width: 75px; }
+    #quiz { padding: 12px; }
+    #question { font-size: 15px; }
+    .answers { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 
 <body>
+<div class="game">
 
-<div id="game-container">
-
-    <div id="sky">
-        <div class="moon"></div>
+    <div class="header">
+        <h1>🛸 UFO HACK NÃO 👽</h1>
+        <p>Thành phố ban đêm — bạn điều khiển UFO — thử thách trí tuệ!</p>
     </div>
 
-    <div id="sidewalk"></div>
-    <div id="road"></div>
-    <div class="lane"></div>
-
-    <div id="ufo">
-        <div id="beam"></div>
-        🛸
+    <div class="stats">
+        <div class="stat"><b id="score">0</b>Điểm</div>
+        <div class="stat"><b id="saved">0</b>Giải cứu</div>
+        <div class="stat"><b id="remaining">12</b>Người còn lại</div>
+        <div class="stat"><b id="round">0</b>Lượt UFO bắt</div>
     </div>
 
-    <div id="topbar">
-        <div class="pill">⭐ Điểm: <span id="score">0</span></div>
-        <div class="pill">🧠 Câu: <span id="qcount">0/10</span></div>
-        <div class="pill">👥 Còn: <span id="remaining">12</span></div>
-    </div>
-
-    <div id="status">
-        Chọn mức độ rồi bấm BẮT ĐẦU GAME.
-    </div>
-
-    <!-- NÚT UFO NẰM BÊN TRONG GIAO DIỆN GAME -->
-    <button id="ufo-catch-btn" onclick="catchRandomPerson()">
-        🛸 UFO BẮT NGƯỜI
-    </button>
-
-    <div id="people"></div>
-
-    <div id="controls">
-        <label>
-            Mức độ
+    <div class="controls">
+        <div class="control">
+            <label>🎯 Mức độ câu hỏi</label>
             <select id="difficulty">
-                <option value="easy">Mức 1 - Dễ vui</option>
-                <option value="medium">Mức 2 - Hack não</option>
-                <option value="hard">Mức 3 - Siêu khó</option>
+                <option value="Mức 1 - Đố vui, đố mẹo">🟢 Mức 1 - Đố vui</option>
+                <option value="Mức 2 - Ca dao, tục ngữ">🟡 Mức 2 - Ca dao tục ngữ</option>
+                <option value="Mức 3 - Toán lớp 9">🔴 Mức 3 - Toán lớp 9</option>
             </select>
-        </label>
+        </div>
 
-        <label>
-            Số người
-            <select id="people-count">
-                <option value="8">8</option>
-                <option value="12" selected>12</option>
-                <option value="16">16</option>
-                <option value="20">20</option>
-            </select>
-        </label>
+        <div class="control">
+            <label>👥 Số người (1–100)</label>
+            <input id="peopleCount" type="number" min="1" max="100" value="12">
+        </div>
 
-        <button id="start-btn" onclick="startGame()">
-            ▶ BẮT ĐẦU GAME
-        </button>
+        <button id="applyPeople">Áp dụng</button>
 
-        <button id="restart-btn"
-                onclick="restartGame()"
-                style="display:none">
-            ↻ Chơi lại
-        </button>
-    </div>
+        <div class="control">
+            <label>Chọn người để đổi tên</label>
+            <select id="renameSelect"></select>
+        </div>
 
-    <button id="mute-btn" onclick="toggleMute()">
-        🔊 Âm thanh: Bật
-    </button>
+        <div class="control">
+            <label>Tên mới</label>
+            <input id="newName" maxlength="18" placeholder="Nhập tên...">
+        </div>
 
-    <div id="question-card" style="display:none">
-        <h2>🧠 HACK NÃO!</h2>
-        <div id="question-meta"></div>
-        <div id="question"></div>
-        <div id="answers"></div>
-        <div id="feedback"></div>
+        <button id="renameButton">✏️ Đổi tên</button>
+        <button id="startButton" class="primary">🔊 BẮT ĐẦU GAME</button>
+        <button id="ufoButton" disabled>🛸 UFO BẮT NGƯỜI</button>
+        <button id="resetButton">🔄 Chơi lại</button>
 
-        <button id="next-btn"
-                onclick="nextQuestion()"
-                style="display:none">
-            Câu tiếp theo ➜
-        </button>
-    </div>
-
-    <div id="start-screen">
-        <div id="start-box">
-            <h1>🛸 UFO HACK NÃO</h1>
-
-            <p>
-                Hãy tự bấm nút
-                <b>UFO BẮT NGƯỜI</b>
-                trong giao diện để chọn ngẫu nhiên một người.
-            </p>
-
-            <p>
-                Mỗi lần UFO bắt một người, một câu đố sẽ xuất hiện.
-                Trả lời đúng để nhận điểm!
-            </p>
-
-            <button id="start-overlay-btn" onclick="startGame()">
-                ▶ BẮT ĐẦU GAME
-            </button>
+        <div class="control" style="max-width:180px">
+            <label>🔊 Âm lượng</label>
+            <input id="volume" type="range" min="0" max="100" value="70">
+            <span id="volumeLabel">70%</span>
         </div>
     </div>
 
+    <div id="scene">
+        <div class="sky"></div>
+        <div class="moon"></div>
+        <div class="buildings" id="buildings"></div>
+        <div class="lamp" style="left:8%"></div>
+        <div class="lamp" style="left:76%"></div>
+        <div class="road"></div>
+        <div class="sidewalk"></div>
+        <div class="road-line"></div>
+
+        <div id="ufo">🛸<div class="beam" id="beam"></div></div>
+        <div id="message">🌃 Đêm xuống... Hãy bắt đầu trò chơi!</div>
+        <div id="peopleLayer"></div>
+
+        <div id="quiz">
+            <h2>🧠 HACK NÃO!</h2>
+            <div id="targetText"></div>
+            <div id="question"></div>
+            <div class="answers" id="answers"></div>
+            <div id="quizResult"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Bạn chủ động bấm UFO BẮT NGƯỜI. UFO không tự bắt người.
+    </div>
 </div>
 
 <script>
-const questionBank = {
-easy: [
-{q:"Cái gì có răng nhưng không biết nhai?",a:["Con cá","Cái lược","Con chó","Cái bát"],c:1},
-{q:"Càng lấy đi thì càng lớn là cái gì?",a:["Cái hố","Ngọn núi","Cái cây","Đám mây"],c:0},
-{q:"Thứ gì có cổ nhưng không có đầu?",a:["Con hươu","Cái áo","Cái chai","Cái bàn"],c:2},
-{q:"Cái gì có mặt, có kim nhưng không có tay?",a:["Đồng hồ","Con mèo","Quyển sách","Cái quạt"],c:0},
-{q:"Tháng nào có 28 ngày?",a:["Tháng 2","Tháng 4","Chỉ tháng 2","Tất cả các tháng"],c:3},
-{q:"Cái gì đi lên đi xuống nhưng vẫn đứng yên?",a:["Cầu thang","Thang máy","Con dốc","Con chim"],c:0},
-{q:"Cái gì càng lau càng ướt?",a:["Cái khăn","Cái bàn","Cửa kính","Đôi giày"],c:0},
-{q:"Có thành phố nhưng không có nhà, có sông nhưng không có nước là gì?",a:["Bản đồ","Bức tranh","Cuốn truyện","Tivi"],c:0},
-{q:"Cái gì có nhiều phím nhưng không mở được cửa?",a:["Bàn phím","Chùm chìa khóa","Cái kéo","Cái hộp"],c:0},
-{q:"Bạn có thể giữ thứ gì sau khi đã trao nó cho người khác?",a:["Quả bóng","Lời hứa","Cái cốc","Chiếc ô"],c:1},
-{q:"Cái gì luôn ở trước mặt nhưng không thể nhìn thấy?",a:["Quá khứ","Tương lai","Cái mũ","Cái bóng"],c:1},
-{q:"Cái gì có chân mà không biết đi?",a:["Con chó","Cái bàn","Con vịt","Con người"],c:1}
-],
+const QUESTION_BANK = __QUESTIONS__;
+const $ = id => document.getElementById(id);
 
-medium: [
-{q:"Một gia đình có 4 người con trai, mỗi người có một em gái chung. Hỏi có mấy người con?",a:["4","5","8","9"],c:1},
-{q:"Bạn vượt qua người đứng thứ hai trong cuộc đua. Bạn đứng thứ mấy?",a:["Thứ nhất","Thứ hai","Thứ ba","Cuối cùng"],c:1},
-{q:"Hai người cha và hai người con đi câu, bắt được 3 con cá, mỗi người một con. Vì sao?",a:["Có người không câu","Họ là ông, bố và con","Một con cá giả","Chia không đều"],c:1},
-{q:"Có 5 quả táo, bạn lấy 2 quả. Bạn có mấy quả?",a:["3","2","5","0"],c:1},
-{q:"Một kg sắt và một kg bông, cái nào nặng hơn?",a:["Sắt","Bông","Bằng nhau","Không so được"],c:2},
-{q:"Một chiếc đồng hồ điểm 6 tiếng trong 5 giây. Điểm 12 tiếng mất bao lâu?",a:["10 giây","11 giây","12 giây","5 giây"],c:1},
-{q:"Có 10 cây nến đang cháy, gió thổi tắt 2 cây. Cuối cùng còn mấy cây nến?",a:["8","2","10","0"],c:1},
-{q:"Một người có 3 chiếc áo và 2 chiếc quần. Có bao nhiêu cách phối một áo với một quần?",a:["5","6","8","9"],c:1},
-{q:"Nếu hôm kia là ngày trước thứ Sáu, hôm nay là thứ mấy?",a:["Thứ Tư","Thứ Năm","Thứ Sáu","Thứ Bảy"],c:2},
-{q:"Có 3 công tắc ngoài phòng và một bóng đèn trong phòng kín. Bạn chỉ được vào phòng một lần. Làm sao biết công tắc nào bật đèn?",a:["Bật thử từng cái","Dùng nhiệt bóng đèn","Đoán","Không thể"],c:1},
-{q:"Một con ốc sên leo cột 10 m, ban ngày lên 3 m, ban đêm tụt 2 m. Bao lâu lên tới đỉnh?",a:["8 ngày","10 ngày","7 ngày","5 ngày"],c:0},
-{q:"Bạn có 6 quả trứng, làm vỡ 2, chiên 2, ăn 2. Còn lại mấy quả?",a:["2","4","6","0"],c:1}
-],
-
-hard: [
-{q:"Dãy số: 2, 3, 5, 8, 12, 17, ... số tiếp theo là?",a:["21","22","23","24"],c:2},
-{q:"Một cây gậy và quả bóng giá 110 nghìn. Gậy đắt hơn bóng 100 nghìn. Quả bóng giá bao nhiêu?",a:["10 nghìn","5 nghìn","15 nghìn","20 nghìn"],c:1},
-{q:"Có 8 viên bi giống nhau, một viên nặng hơn. Ít nhất cần cân bao nhiêu lần để tìm ra viên nặng?",a:["1","2","3","4"],c:2},
-{q:"Nếu 5 máy làm 5 món đồ trong 5 phút, 100 máy làm 100 món đồ trong bao lâu?",a:["100 phút","20 phút","5 phút","1 phút"],c:2},
-{q:"Một số có hai chữ số. Tổng hai chữ số bằng 9; đảo vị trí thì số mới lớn hơn số cũ 27. Số ban đầu là?",a:["36","45","54","27"],c:0},
-{q:"Dãy số: 1, 1, 2, 3, 5, 8, ... số tiếp theo?",a:["11","12","13","15"],c:2},
-{q:"Một căn phòng có 4 góc, mỗi góc có một con mèo. Mỗi con mèo nhìn thấy 3 con mèo. Có tất cả mấy con mèo?",a:["4","8","12","16"],c:0},
-{q:"Nếu 3 con mèo bắt 3 con chuột trong 3 phút, 100 con mèo bắt 100 con chuột trong bao lâu?",a:["100 phút","3 phút","30 phút","1 phút"],c:1},
-{q:"Bạn có hai sợi dây, mỗi sợi cháy hết đúng 60 phút nhưng cháy không đều. Đốt dây thế nào để đo 45 phút?",a:["Không thể","Đốt dây 1 hai đầu, dây 2 một đầu; khi dây 1 hết thì đốt đầu kia dây 2","Đốt cả hai một đầu","Đốt một dây"],c:1},
-{q:"Một người nhìn ảnh và nói: 'Tôi không có anh chị em, nhưng cha người trong ảnh là con trai của cha tôi.' Người trong ảnh là ai?",a:["Cha anh ấy","Con trai anh ấy","Anh họ","Chính anh ấy"],c:1},
-{q:"Một số nhân với chính nó bằng 144. Tổng các chữ số của số dương đó là?",a:["6","9","12","18"],c:1},
-{q:"Bạn có 9 đồng xu, một đồng giả nhẹ hơn. Ít nhất cần cân bao nhiêu lần để tìm đồng giả?",a:["1","2","3","4"],c:1}
-]
-};
+const peopleLayer = $("peopleLayer");
+const ufo = $("ufo");
+const beam = $("beam");
+const quiz = $("quiz");
+const message = $("message");
 
 let people = [];
 let score = 0;
-let questionsAsked = 0;
-const totalQuestions = 10;
-
+let saved = 0;
+let round = 0;
 let gameStarted = false;
-let questionActive = false;
-let answered = false;
-let currentQuestion = null;
+let quizOpen = false;
+let abductionInProgress = false;
+let lastQuestion = null;
 
-let audioCtx = null;
-let bgGain = null;
-let bgTimer = null;
-let muted = false;
-
-const colors = [
-    "#f26c4f", "#31c48d", "#f5b82e",
-    "#a78bfa", "#ec72b7", "#55b8f2",
-    "#ff875a"
+const shirts = [
+    "#e74c3c", "#3498db", "#2ecc71", "#f1c40f",
+    "#9b59b6", "#ff8c42", "#ff69b4", "#4ecdc4"
 ];
 
-function makeCity() {
-    const sky = document.getElementById("sky");
+const pantsColors = ["#202d46", "#353535", "#293b59", "#493b35"];
+const skinColors = ["#f4c7a1", "#d99a6c", "#b9754c", "#f0d1b0"];
+const hairColors = ["#211914", "#563a25", "#292929", "#a56a32"];
 
-    sky.querySelectorAll(".star, .building").forEach(
-        e => e.remove()
-    );
+// ==========================================
+// ÂM THANH
+// ==========================================
 
-    for (let i = 0; i < 75; i++) {
-        const star = document.createElement("div");
-        star.className = "star";
-        star.style.left = Math.random() * 100 + "%";
-        star.style.top = Math.random() * 95 + "%";
-        star.style.opacity = 0.35 + Math.random() * 0.65;
-        sky.appendChild(star);
-    }
+let audioContext = null;
+let masterGain = null;
+let musicTimer = null;
+let noteIndex = 0;
 
-    for (let i = 0; i < 9; i++) {
-        const building = document.createElement("div");
-        building.className = "building";
-        building.style.left = (i * 11.5 - 1) + "%";
-        building.style.width = (8 + Math.random() * 4) + "%";
-        building.style.height = (110 + Math.random() * 135) + "px";
+const melody = [
+    523.25, 659.25, 783.99, 659.25,
+    587.33, 698.46, 880.00, 698.46,
+    493.88, 587.33, 739.99, 587.33,
+    440.00, 554.37, 659.25, 554.37
+];
 
-        for (let row = 0; row < 5; row++) {
-            for (let col = 0; col < 3; col++) {
-                const win = document.createElement("div");
-                win.className = "window";
-                win.style.left = (8 + col * 29) + "%";
-                win.style.top = (8 + row * 18) + "px";
+const bassNotes = [130.81, 146.83, 123.47, 110.00];
 
-                if (Math.random() > 0.25) {
-                    win.style.background = "#ffdf69";
-                } else {
-                    win.style.background = "#414b60";
-                }
+function setVolume() {
+    const value = Number($("volume").value);
+    $("volumeLabel").textContent = value + "%";
 
-                building.appendChild(win);
-            }
-        }
-
-        sky.appendChild(building);
-    }
-}
-
-function makePeople(count) {
-    const root = document.getElementById("people");
-    root.innerHTML = "";
-    people = [];
-
-    for (let i = 0; i < count; i++) {
-        const person = document.createElement("div");
-        person.className = "person";
-        person.dataset.caught = "0";
-
-        person.style.left = (5 + Math.random() * 90) + "%";
-        person.style.top = (63 + Math.random() * 18) + "%";
-        person.style.setProperty(
-            "--shirt",
-            colors[i % colors.length]
+    if (masterGain && audioContext) {
+        masterGain.gain.setTargetAtTime(
+            value / 100 * 0.8,
+            audioContext.currentTime,
+            0.06
         );
-
-        person.innerHTML = `
-            <div class="hair"></div>
-            <div class="head"></div>
-            <div class="body"></div>
-            <div class="legs">
-                <span></span><span></span>
-            </div>
-            <div class="label">Người ${i + 1}</div>
-        `;
-
-        root.appendChild(person);
-        people.push(person);
     }
-
-    updateHUD();
 }
-
-function updateHUD() {
-    document.getElementById("score").textContent = score;
-
-    document.getElementById("qcount").textContent =
-        questionsAsked + "/" + totalQuestions;
-
-    document.getElementById("remaining").textContent =
-        people.filter(p => p.dataset.caught === "0").length;
-}
-
-/* ÂM THANH */
 
 function initAudio() {
-    if (!audioCtx) {
-        audioCtx = new (
-            window.AudioContext ||
-            window.webkitAudioContext
-        )();
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioCtx) {
+        setMessage("Trình duyệt không hỗ trợ âm thanh.");
+        return;
     }
 
-    if (audioCtx.state === "suspended") {
-        audioCtx.resume();
+    if (!audioContext) {
+        audioContext = new AudioCtx();
+        masterGain = audioContext.createGain();
+
+        masterGain.gain.value =
+            Number($("volume").value) / 100 * 0.8;
+
+        masterGain.connect(audioContext.destination);
+        startMusic();
     }
 
-    if (!bgGain) {
-        bgGain = audioCtx.createGain();
-
-        // Nhạc nền nhỏ hơn hiệu ứng đúng/sai.
-        bgGain.gain.value = muted ? 0 : 0.045;
-        bgGain.connect(audioCtx.destination);
-
-        const notes = [
-            220, 261.63, 329.63, 293.66,
-            246.94, 293.66, 349.23, 329.63
-        ];
-
-        let noteIndex = 0;
-
-        bgTimer = setInterval(() => {
-            if (!audioCtx || muted) return;
-
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-
-            osc.type = "sine";
-            osc.frequency.value =
-                notes[noteIndex++ % notes.length];
-
-            gain.gain.setValueAtTime(
-                0.0001, audioCtx.currentTime
-            );
-
-            gain.gain.exponentialRampToValueAtTime(
-                0.10, audioCtx.currentTime + 0.06
-            );
-
-            gain.gain.exponentialRampToValueAtTime(
-                0.0001, audioCtx.currentTime + 0.45
-            );
-
-            osc.connect(gain);
-            gain.connect(bgGain);
-
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.48);
-
-        }, 520);
+    if (audioContext.state === "suspended") {
+        audioContext.resume();
     }
 }
 
-function tone(freq, duration, volume, type = "sine", delay = 0) {
-    if (muted) return;
+function tone(
+    frequency,
+    duration,
+    type = "sine",
+    volume = 0.2,
+    delay = 0
+) {
+    if (!audioContext || !masterGain) return;
 
-    initAudio();
+    const startAt = audioContext.currentTime + delay;
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
 
-    const now = audioCtx.currentTime + delay;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(frequency, startAt);
 
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, now);
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(4200, startAt);
 
-    gain.gain.setValueAtTime(0.0001, now);
-
+    gain.gain.setValueAtTime(0.0001, startAt);
     gain.gain.exponentialRampToValueAtTime(
-        Math.max(0.001, volume),
-        now + 0.015
+        Math.max(0.0002, volume),
+        startAt + 0.025
     );
 
     gain.gain.exponentialRampToValueAtTime(
         0.0001,
-        now + duration
+        startAt + duration
     );
+
+    oscillator.connect(filter);
+    filter.connect(gain);
+    gain.connect(masterGain);
+
+    oscillator.start(startAt);
+    oscillator.stop(startAt + duration + 0.03);
+}
+
+function playKick(delay = 0) {
+    if (!audioContext || !masterGain) return;
+
+    const startAt = audioContext.currentTime + delay;
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(120, startAt);
+    osc.frequency.exponentialRampToValueAtTime(45, startAt + 0.14);
+
+    gain.gain.setValueAtTime(0.22, startAt);
+    gain.gain.exponentialRampToValueAtTime(0.001, startAt + 0.16);
 
     osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    gain.connect(masterGain);
 
-    osc.start(now);
-    osc.stop(now + duration + 0.03);
+    osc.start(startAt);
+    osc.stop(startAt + 0.17);
 }
 
-function playCorrect() {
-    // Âm thanh đúng to và sáng rõ.
-    tone(880, 0.22, 0.90, "triangle");
-    tone(1175, 0.30, 0.85, "triangle", 0.16);
-    tone(1480, 0.38, 0.80, "sine", 0.34);
+function startMusic() {
+    if (!audioContext) return;
+
+    clearInterval(musicTimer);
+    noteIndex = 0;
+
+    musicTimer = setInterval(() => {
+        if (!audioContext || audioContext.state !== "running") return;
+
+        const step = noteIndex % melody.length;
+        const note = melody[step];
+        const bass = bassNotes[Math.floor(step / 4) % bassNotes.length];
+
+        tone(note, 0.24, "triangle", 0.13);
+
+        if (step % 2 === 0) {
+            tone(note * 1.5, 0.17, "sine", 0.045, 0.035);
+        }
+
+        if (step % 4 === 0) {
+            tone(bass, 0.34, "triangle", 0.15);
+            playKick();
+        }
+
+        if (step % 4 === 2) {
+            tone(1100, 0.045, "square", 0.025);
+        }
+
+        noteIndex++;
+    }, 220);
 }
 
-function playWrong() {
-    // Âm thanh sai to, trầm và dễ nhận biết.
-    tone(260, 0.30, 0.90, "sawtooth");
-    tone(190, 0.42, 0.85, "square", 0.22);
+function playUfoSound() {
+    if (!audioContext) return;
+
+    tone(440, 0.45, "sawtooth", 0.16);
+    tone(660, 0.5, "triangle", 0.12, 0.12);
+    tone(880, 0.5, "sine", 0.09, 0.25);
 }
 
-function playUfo() {
-    tone(620, 0.22, 0.40, "sine");
-    tone(820, 0.30, 0.32, "sine", 0.16);
+function playCorrectSound() {
+    if (!audioContext) return;
+
+    tone(523.25, 0.18, "triangle", 0.24, 0);
+    tone(659.25, 0.18, "triangle", 0.24, 0.13);
+    tone(783.99, 0.20, "triangle", 0.25, 0.26);
+    tone(1046.50, 0.42, "sine", 0.28, 0.40);
+    tone(1318.51, 0.28, "sine", 0.10, 0.48);
 }
 
-function toggleMute() {
-    muted = !muted;
+function playWrongSound() {
+    if (!audioContext) return;
 
-    document.getElementById("mute-btn").textContent =
-        muted ? "🔇 Âm thanh: Tắt" : "🔊 Âm thanh: Bật";
+    tone(329.63, 0.22, "triangle", 0.22, 0);
+    tone(277.18, 0.28, "triangle", 0.23, 0.17);
+    tone(220.00, 0.38, "sine", 0.25, 0.36);
+}
 
-    if (bgGain && audioCtx) {
-        bgGain.gain.setTargetAtTime(
-            muted ? 0 : 0.045,
-            audioCtx.currentTime,
-            0.05
-        );
+// ==========================================
+// GIAO DIỆN VÀ NHÂN VẬT
+// ==========================================
+
+function setMessage(text) {
+    message.textContent = text;
+}
+
+function createBuildings() {
+    const container = $("buildings");
+    container.innerHTML = "";
+
+    const heights = [65, 90, 75, 100, 68, 86, 72, 94];
+
+    heights.forEach(height => {
+        const building = document.createElement("div");
+        building.className = "building";
+        building.style.setProperty("--height", height + "%");
+
+        const windows = document.createElement("div");
+        windows.className = "windows";
+
+        for (let i = 0; i < 12; i++) {
+            const win = document.createElement("div");
+            win.className = "window";
+
+            if (Math.random() < 0.25) win.style.opacity = "0.15";
+
+            windows.appendChild(win);
+        }
+
+        building.appendChild(windows);
+        container.appendChild(building);
+    });
+}
+
+function createPerson(index) {
+    const el = document.createElement("div");
+    el.className = "person";
+
+    const person = {
+        id: index + 1,
+        name: "Người " + (index + 1),
+        el: el,
+        x: 2 + Math.random() * 90,
+        y: 58 + Math.random() * 20,
+        speed: 0.012 + Math.random() * 0.02,
+        direction: Math.random() > 0.5 ? 1 : -1,
+        alive: true,
+        captured: false
+    };
+
+    el.style.setProperty("--shirt",
+        shirts[Math.floor(Math.random() * shirts.length)]);
+    el.style.setProperty("--pants",
+        pantsColors[Math.floor(Math.random() * pantsColors.length)]);
+    el.style.setProperty("--skin",
+        skinColors[Math.floor(Math.random() * skinColors.length)]);
+    el.style.setProperty("--hair",
+        hairColors[Math.floor(Math.random() * hairColors.length)]);
+
+    el.innerHTML = `
+        <div class="hair"></div>
+        <div class="head"></div>
+        <div class="body"></div>
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+        <div class="leg left"></div>
+        <div class="leg right"></div>
+        <div class="shoe left"></div>
+        <div class="shoe right"></div>
+        <div class="nameTag"></div>
+    `;
+
+    el.querySelector(".nameTag").textContent = person.name;
+
+    peopleLayer.appendChild(el);
+    people.push(person);
+    positionPerson(person);
+
+    return person;
+}
+
+function positionPerson(person) {
+    person.el.style.left = person.x + "%";
+    person.el.style.top = person.y + "%";
+    person.el.style.zIndex = String(Math.floor(person.y));
+
+    const scale = 0.7 + ((person.y - 58) / 20) * 0.45;
+
+    person.el.style.transform =
+        "scale(" + scale + ") scaleX(" + person.direction + ")";
+}
+
+function refreshRenameSelect() {
+    const select = $("renameSelect");
+    const previous = select.value;
+
+    select.innerHTML = "";
+
+    people.filter(p => p.alive).forEach(person => {
+        const option = document.createElement("option");
+        option.value = person.id;
+        option.textContent = person.name;
+        select.appendChild(option);
+    });
+
+    if ([...select.options].some(o => o.value === previous)) {
+        select.value = previous;
     }
 }
 
-/* BẮT ĐẦU GAME */
+function updateStats() {
+    $("score").textContent = score;
+    $("saved").textContent = saved;
+    $("remaining").textContent = people.filter(p => p.alive).length;
+    $("round").textContent = round;
+}
 
-function startGame() {
-    initAudio();
+function createCity(count) {
+    gameStarted = false;
+    quizOpen = false;
+    abductionInProgress = false;
+
+    peopleLayer.innerHTML = "";
+    people = [];
+
+    quiz.style.display = "none";
+    beam.style.display = "none";
 
     score = 0;
-    questionsAsked = 0;
-    gameStarted = true;
-    questionActive = false;
-    answered = false;
+    saved = 0;
+    round = 0;
+    lastQuestion = null;
 
-    const count = parseInt(
-        document.getElementById("people-count").value,
-        10
-    );
+    for (let i = 0; i < count; i++) {
+        createPerson(i);
+    }
 
-    makePeople(count);
-    updateHUD();
+    refreshRenameSelect();
+    updateStats();
 
-    document.getElementById("start-screen").style.display = "none";
-    document.getElementById("question-card").style.display = "none";
-    document.getElementById("start-btn").style.display = "none";
-    document.getElementById("restart-btn").style.display = "inline-block";
+    $("startButton").textContent = "🔊 BẮT ĐẦU GAME";
+    $("ufoButton").disabled = true;
 
-    document.getElementById("ufo-catch-btn").disabled = false;
-
-    document.getElementById("status").textContent =
-        "Bấm nút UFO BẮT NGƯỜI để chọn ngẫu nhiên một người!";
+    setMessage("🌃 Đêm xuống... Hãy bấm BẮT ĐẦU GAME!");
+    ufo.style.left = "12%";
+    ufo.style.top = "8%";
 }
 
-function restartGame() {
-    startGame();
+function animatePeople() {
+    people.forEach(person => {
+        if (!person.alive || person.captured) return;
+
+        if (!gameStarted) return;
+
+        person.x += person.speed * person.direction;
+
+        if (person.x > 94) {
+            person.x = 94;
+            person.direction = -1;
+        }
+
+        if (person.x < 1) {
+            person.x = 1;
+            person.direction = 1;
+        }
+
+        positionPerson(person);
+    });
+
+    requestAnimationFrame(animatePeople);
 }
 
-/* UFO BẮT NGƯỜI */
+// ==========================================
+// UFO BẮT NGƯỜI — CHỈ KHI BẠN BẤM NÚT
+// ==========================================
 
-function catchRandomPerson() {
-    if (!gameStarted) {
-        document.getElementById("status").textContent =
-            "Hãy bấm BẮT ĐẦU GAME trước nhé!";
+function beginAbduction() {
+    if (!gameStarted || quizOpen || abductionInProgress) return;
+
+    const living = people.filter(p => p.alive && !p.captured);
+
+    if (living.length === 0) {
+        gameStarted = false;
+        $("ufoButton").disabled = true;
+        setMessage("👽 Hết người rồi! Hãy bấm CHƠI LẠI.");
         return;
     }
 
-    if (questionActive) {
-        document.getElementById("status").textContent =
-            "Hãy trả lời câu hỏi hiện tại trước nhé!";
-        return;
-    }
+    abductionInProgress = true;
+    $("ufoButton").disabled = true;
 
-    if (questionsAsked >= totalQuestions) {
-        document.getElementById("status").textContent =
-            "Bạn đã hoàn thành 10 câu! Bấm Chơi lại để tiếp tục.";
-        return;
-    }
+    const target = living[Math.floor(Math.random() * living.length)];
+    round++;
 
-    const available = people.filter(
-        p => p.dataset.caught === "0"
-    );
+    ufo.style.left = Math.max(0, Math.min(85, target.x - 3)) + "%";
+    ufo.style.top = "7%";
 
-    if (available.length === 0) {
-        document.getElementById("status").textContent =
-            "Không còn người nào để bắt. Hãy bấm Chơi lại!";
-        return;
-    }
+    beam.style.display = "block";
+    setMessage("🛸 UFO đang bắt " + target.name + "!");
 
-    const target = available[
-        Math.floor(Math.random() * available.length)
-    ];
-
-    target.dataset.caught = "1";
-    target.classList.add("captured");
-
-    document.getElementById("beam").style.display = "block";
-
-    playUfo();
+    playUfoSound();
 
     setTimeout(() => {
-        document.getElementById("beam").style.display = "none";
-    }, 650);
+        if (!target.alive) {
+            abductionInProgress = false;
+            beam.style.display = "none";
+            return;
+        }
 
-    questionsAsked++;
-    updateHUD();
-    showQuestion();
+        target.captured = true;
+        target.el.classList.add("captured");
+
+        setTimeout(() => {
+            target.alive = false;
+            target.captured = false;
+            target.el.style.display = "none";
+
+            beam.style.display = "none";
+            updateStats();
+            refreshRenameSelect();
+
+            showQuestion(target);
+        }, 1100);
+    }, 800);
 }
 
-/* CÂU HỎI */
+// ==========================================
+// HIỂN THỊ VÀ TRẢ LỜI CÂU HỎI
+// ==========================================
 
-function showQuestion() {
-    questionActive = true;
-    answered = false;
+function showQuestion(target) {
+    gameStarted = false;
+    quizOpen = true;
+    $("ufoButton").disabled = true;
 
-    const level = document.getElementById("difficulty").value;
-    const questions = questionBank[level];
+    const level = $("difficulty").value;
+    const list = QUESTION_BANK[level];
 
-    currentQuestion = questions[
-        Math.floor(Math.random() * questions.length)
-    ];
+    const available = list.filter(q => q.q !== lastQuestion);
+    const pool = available.length ? available : list;
+    const question = pool[Math.floor(Math.random() * pool.length)];
 
-    const levelName = {
-        easy: "Mức 1 - Dễ vui",
-        medium: "Mức 2 - Hack não",
-        hard: "Mức 3 - Siêu khó"
-    }[level];
+    lastQuestion = question.q;
 
-    document.getElementById("question-meta").textContent =
-        "🛸 UFO đã bắt người! | " +
-        levelName +
-        " | Câu " +
-        questionsAsked +
-        "/" +
-        totalQuestions;
+    $("targetText").textContent =
+        "🛸 UFO đã bắt " + target.name + "! Mức độ: " + level;
 
-    document.getElementById("question").textContent =
-        currentQuestion.q;
+    $("question").textContent = question.q;
+    $("quizResult").textContent = "";
 
-    const answers = document.getElementById("answers");
-    answers.innerHTML = "";
+    const answerBox = $("answers");
+    answerBox.innerHTML = "";
 
-    currentQuestion.a.forEach((answer, index) => {
+    question.a.forEach((answer, index) => {
         const button = document.createElement("button");
-
-        button.className = "answer";
         button.textContent = answer;
 
-        button.onclick = () => {
-            answerQuestion(index, button);
-        };
+        button.addEventListener("click", () => {
+            [...answerBox.querySelectorAll("button")].forEach(b => {
+                b.disabled = true;
+            });
 
-        answers.appendChild(button);
+            if (index === question.correct) {
+                score += 10;
+                saved += 1;
+
+                $("quizResult").textContent =
+                    "🎉 Chính xác! +10 điểm. " + question.explain;
+
+                playCorrectSound();
+            } else {
+                $("quizResult").textContent =
+                    "❌ Chưa đúng. Đáp án đúng: " +
+                    question.a[question.correct] +
+                    ". " + question.explain;
+
+                playWrongSound();
+            }
+
+            updateStats();
+
+            const next = document.createElement("button");
+            next.className = "primary";
+            next.textContent = "▶ TIẾP TỤC";
+            next.style.gridColumn = "1 / -1";
+
+            next.addEventListener("click", () => {
+                quiz.style.display = "none";
+                quizOpen = false;
+                abductionInProgress = false;
+
+                if (people.every(p => !p.alive)) {
+                    gameStarted = false;
+                    $("startButton").textContent = "🔊 BẮT ĐẦU GAME";
+                    $("ufoButton").disabled = true;
+                    setMessage("👽 Hết người rồi! Hãy bấm CHƠI LẠI.");
+                    return;
+                }
+
+                gameStarted = true;
+                $("startButton").textContent = "⏸ TẠM DỪNG GAME";
+                $("ufoButton").disabled = false;
+
+                setMessage(
+                    "🌃 Bấm 🛸 UFO BẮT NGƯỜI khi bạn muốn bắt tiếp!"
+                );
+            });
+
+            answerBox.appendChild(next);
+        });
+
+        answerBox.appendChild(button);
     });
 
-    document.getElementById("feedback").textContent = "";
-    document.getElementById("next-btn").style.display = "none";
-    document.getElementById("question-card").style.display = "block";
-
-    document.getElementById("status").textContent =
-        "Hãy chọn một đáp án trong bảng câu hỏi!";
+    quiz.style.display = "block";
 }
 
-function answerQuestion(index, button) {
-    if (answered) return;
+// ==========================================
+// CÁC NÚT ĐIỀU KHIỂN
+// ==========================================
 
-    answered = true;
+$("applyPeople").addEventListener("click", resetGame);
+$("resetButton").addEventListener("click", resetGame);
 
-    const buttons = [
-        ...document.querySelectorAll(".answer")
-    ];
+$("renameButton").addEventListener("click", () => {
+    const id = Number($("renameSelect").value);
+    const name = $("newName").value.trim();
 
-    buttons.forEach(b => {
-        b.disabled = true;
-    });
-
-    const feedback = document.getElementById("feedback");
-
-    if (index === currentQuestion.c) {
-        score += 10;
-
-        button.style.background = "#16794b";
-
-        feedback.textContent = "✅ Chính xác! +10 điểm";
-        feedback.style.color = "#64ffab";
-
-        playCorrect();
-
-    } else {
-        button.style.background = "#a52e43";
-
-        buttons[currentQuestion.c].style.background = "#16794b";
-
-        feedback.textContent =
-            "❌ Chưa đúng! Đáp án: " +
-            currentQuestion.a[currentQuestion.c];
-
-        feedback.style.color = "#ff929f";
-
-        playWrong();
+    if (!name) {
+        setMessage("✏️ Hãy nhập tên mới!");
+        return;
     }
 
-    updateHUD();
+    const person = people.find(p => p.id === id && p.alive);
 
-    const nextButton = document.getElementById("next-btn");
+    if (!person) {
+        setMessage("Người này không còn trên phố.");
+        return;
+    }
 
-    nextButton.style.display = "inline-block";
+    person.name = name.slice(0, 18);
+    person.el.querySelector(".nameTag").textContent = person.name;
 
-    nextButton.textContent =
-        questionsAsked >= totalQuestions
-        ? "Xem kết quả"
-        : "Câu tiếp theo ➜";
-}
+    refreshRenameSelect();
+    $("renameSelect").value = String(person.id);
+    $("newName").value = "";
 
-function nextQuestion() {
-    document.getElementById("question-card").style.display = "none";
+    setMessage("✨ Đã đổi tên thành " + person.name + "!");
+});
 
-    questionActive = false;
+$("startButton").addEventListener("click", () => {
+    initAudio();
 
-    if (questionsAsked >= totalQuestions) {
+    if (quizOpen || abductionInProgress) {
+        setMessage("🧠 Hãy hoàn thành câu hỏi hiện tại trước!");
+        return;
+    }
+
+    if (gameStarted) {
         gameStarted = false;
-
-        document.getElementById("status").textContent =
-            "🎉 Hoàn thành! Điểm của bạn: " +
-            score +
-            " / " +
-            (totalQuestions * 10) +
-            ". Bấm Chơi lại để chơi lần nữa.";
-
-        document.getElementById("ufo-catch-btn").disabled = true;
-
+        $("startButton").textContent = "▶ TIẾP TỤC GAME";
+        $("ufoButton").disabled = true;
+        setMessage("⏸ Game đang tạm dừng.");
     } else {
-        document.getElementById("status").textContent =
-            "Bấm 🛸 UFO BẮT NGƯỜI để chọn người tiếp theo!";
+        if (people.every(p => !p.alive)) {
+            resetGame();
+        }
+
+        gameStarted = true;
+        $("startButton").textContent = "⏸ TẠM DỪNG GAME";
+        $("ufoButton").disabled = false;
+
+        setMessage("🛸 Game bắt đầu! Hãy tự bấm UFO BẮT NGƯỜI.");
     }
+});
+
+$("ufoButton").addEventListener("click", () => {
+    if (!gameStarted) {
+        setMessage("▶ Hãy bấm BẮT ĐẦU GAME trước!");
+        return;
+    }
+
+    if (quizOpen) {
+        setMessage("🧠 Hãy trả lời câu hỏi trước!");
+        return;
+    }
+
+    if (abductionInProgress) {
+        setMessage("🛸 UFO đang bắt người!");
+        return;
+    }
+
+    beginAbduction();
+});
+
+$("volume").addEventListener("input", setVolume);
+
+function resetGame() {
+    let count = parseInt($("peopleCount").value, 10);
+
+    if (!Number.isFinite(count)) count = 12;
+
+    count = Math.max(1, Math.min(100, count));
+    $("peopleCount").value = count;
+
+    createCity(count);
 }
 
-makeCity();
-makePeople(12);
+createBuildings();
+createCity(12);
+animatePeople();
+setVolume();
 </script>
-
 </body>
 </html>
 """
 
+GAME_HTML = GAME_HTML.replace("__QUESTIONS__", QUESTIONS_JSON)
+
+st.markdown("""
+<style>
+.stApp {
+    background-color: #080d1b;
+}
+[data-testid="stHeader"] {
+    background: transparent;
+}
+h1 {
+    color: #ffe66d !important;
+    text-align: center;
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.title("🛸 UFO HACK NÃO")
+st.caption(
+    "Chọn mức độ câu hỏi, sau đó tự bấm nút UFO BẮT NGƯỜI "
+    "để chọn ngẫu nhiên một nhân vật."
+)
+
 components.html(
     GAME_HTML,
-    height=650,
-    scrolling=False
+    height=1200,
+    scrolling=True
 )
