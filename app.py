@@ -803,7 +803,6 @@ button:disabled {
 
         <button id="renameButton">✏️ Đổi tên</button>
         <button id="startButton" class="primary">🔊 BẮT ĐẦU GAME</button>
-        <button id="ufoButton" disabled>🛸 UFO BẮT NGƯỜI</button>
         <button id="resetButton">🔄 Chơi lại</button>
 
         <div class="control" style="max-width:180px">
@@ -825,6 +824,7 @@ button:disabled {
 
         <div id="ufo">🛸<div class="beam" id="beam"></div></div>
         <div id="message">🌃 Đêm xuống... Hãy bắt đầu trò chơi!</div>
+        <button id="ufoButton" disabled>🛸 UFO BẮT NGƯỜI</button>
         <div id="peopleLayer"></div>
 
         <div id="quiz">
@@ -974,7 +974,7 @@ function playKick(delay = 0) {
     osc.frequency.setValueAtTime(120, startAt);
     osc.frequency.exponentialRampToValueAtTime(45, startAt + 0.14);
 
-    gain.gain.setValueAtTime(0.22, startAt);
+    gain.gain.setValueAtTime(0.07, startAt);
     gain.gain.exponentialRampToValueAtTime(0.001, startAt + 0.16);
 
     osc.connect(gain);
@@ -997,19 +997,19 @@ function startMusic() {
         const note = melody[step];
         const bass = bassNotes[Math.floor(step / 4) % bassNotes.length];
 
-        tone(note, 0.24, "triangle", 0.13);
+        tone(note, 0.24, "triangle", 0.035);
 
         if (step % 2 === 0) {
-            tone(note * 1.5, 0.17, "sine", 0.045, 0.035);
+            tone(note * 1.5, 0.17, "sine", 0.012, 0.035);
         }
 
         if (step % 4 === 0) {
-            tone(bass, 0.34, "triangle", 0.15);
+            tone(bass, 0.34, "triangle", 0.045);
             playKick();
         }
 
         if (step % 4 === 2) {
-            tone(1100, 0.045, "square", 0.025);
+            tone(1100, 0.045, "square", 0.009);
         }
 
         noteIndex++;
@@ -1027,19 +1027,19 @@ function playUfoSound() {
 function playCorrectSound() {
     if (!audioContext) return;
 
-    tone(523.25, 0.18, "triangle", 0.24, 0);
-    tone(659.25, 0.18, "triangle", 0.24, 0.13);
-    tone(783.99, 0.20, "triangle", 0.25, 0.26);
-    tone(1046.50, 0.42, "sine", 0.28, 0.40);
-    tone(1318.51, 0.28, "sine", 0.10, 0.48);
+    tone(523.25, 0.18, "triangle", 0.62, 0);
+    tone(659.25, 0.18, "triangle", 0.62, 0.13);
+    tone(783.99, 0.20, "triangle", 0.65, 0.26);
+    tone(1046.50, 0.42, "sine", 0.72, 0.40);
+    tone(1318.51, 0.28, "sine", 0.32, 0.48);
 }
 
 function playWrongSound() {
     if (!audioContext) return;
 
-    tone(329.63, 0.22, "triangle", 0.22, 0);
-    tone(277.18, 0.28, "triangle", 0.23, 0.17);
-    tone(220.00, 0.38, "sine", 0.25, 0.36);
+    tone(329.63, 0.22, "triangle", 0.62, 0);
+    tone(277.18, 0.28, "triangle", 0.65, 0.17);
+    tone(220.00, 0.38, "sine", 0.72, 0.36);
 }
 
 // ==========================================
