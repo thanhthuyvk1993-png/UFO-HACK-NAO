@@ -8,10 +8,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# =====================================================
-# BỘ CÂU HỎI
-# =====================================================
-
 QUESTIONS = {
     "Mức 1 - Đố vui, đố mẹo": [
         {
@@ -52,14 +48,9 @@ QUESTIONS = {
         },
         {
             "q": "Bạn có thể cầm gì bằng tay trái nhưng không thể cầm bằng tay phải?",
-            "a": [
-                "Cái cốc",
-                "Khuỷu tay phải",
-                "Quyển sách",
-                "Cái bút"
-            ],
+            "a": ["Cái cốc", "Khuỷu tay phải", "Quyển sách", "Cái bút"],
             "correct": 1,
-            "explain": "Bạn không thể dùng tay phải để cầm chính khuỷu tay phải."
+            "explain": "Bạn không thể dùng tay phải cầm chính khuỷu tay phải."
         },
         {
             "q": "Cái gì luôn đến nhưng không bao giờ trở thành hôm qua?",
@@ -71,7 +62,7 @@ QUESTIONS = {
             "q": "Một căn phòng có 4 góc, mỗi góc có một con mèo. Có bao nhiêu con mèo?",
             "a": ["2", "4", "8", "16"],
             "correct": 1,
-            "explain": "Mỗi góc có một con mèo, tổng cộng 4 con."
+            "explain": "Có tổng cộng 4 con mèo."
         },
         {
             "q": "Cái gì có mặt và hai kim nhưng không có tay?",
@@ -83,49 +74,49 @@ QUESTIONS = {
 
     "Mức 2 - Ca dao, tục ngữ": [
         {
-            "q": "Điền từ còn thiếu: Có công mài sắt, có ngày nên ...",
+            "q": "Có công mài sắt, có ngày nên ...",
             "a": ["Kim", "Dao", "Kéo", "Búa"],
             "correct": 0,
-            "explain": "Câu tục ngữ: Có công mài sắt, có ngày nên kim."
+            "explain": "Có công mài sắt, có ngày nên kim."
         },
         {
-            "q": "Điền từ còn thiếu: Uống nước nhớ ...",
+            "q": "Uống nước nhớ ...",
             "a": ["Cây", "Nguồn", "Sông", "Suối"],
             "correct": 1,
-            "explain": "Uống nước nhớ nguồn, nhắc nhở lòng biết ơn."
+            "explain": "Uống nước nhớ nguồn."
         },
         {
-            "q": "Điền từ còn thiếu: Lá lành đùm lá ...",
+            "q": "Lá lành đùm lá ...",
             "a": ["Đỏ", "Xanh", "Rách", "Vàng"],
             "correct": 2,
-            "explain": "Lá lành đùm lá rách, nói về tinh thần tương trợ."
+            "explain": "Lá lành đùm lá rách."
         },
         {
-            "q": "Điền từ còn thiếu: Gần mực thì đen, gần đèn thì ...",
+            "q": "Gần mực thì đen, gần đèn thì ...",
             "a": ["Sáng", "Tối", "Nóng", "Lạnh"],
             "correct": 0,
-            "explain": "Câu tục ngữ nói về ảnh hưởng của môi trường sống."
+            "explain": "Câu tục ngữ nói về ảnh hưởng của môi trường."
         },
         {
-            "q": "Điền từ còn thiếu: Thất bại là mẹ thành ...",
+            "q": "Thất bại là mẹ thành ...",
             "a": ["Công", "Danh", "Đạt", "Tài"],
             "correct": 0,
             "explain": "Thất bại là mẹ thành công."
         },
         {
-            "q": "Điền từ còn thiếu: Ăn quả nhớ kẻ trồng ...",
+            "q": "Ăn quả nhớ kẻ trồng ...",
             "a": ["Hoa", "Cây", "Đất", "Rừng"],
             "correct": 1,
-            "explain": "Ăn quả nhớ kẻ trồng cây, nhắc nhở lòng biết ơn."
+            "explain": "Ăn quả nhớ kẻ trồng cây."
         },
         {
-            "q": "Điền từ còn thiếu: Một cây làm chẳng nên non, ba cây chụm lại nên hòn núi ...",
+            "q": "Một cây làm chẳng nên non, ba cây chụm lại nên hòn núi ...",
             "a": ["Đỏ", "Cao", "Thái Sơn", "Lớn"],
             "correct": 2,
-            "explain": "Câu ca dao đề cao tinh thần đoàn kết."
+            "explain": "Câu tục ngữ đề cao tinh thần đoàn kết."
         },
         {
-            "q": "Câu nào khuyên chúng ta phải biết ơn người giúp đỡ mình?",
+            "q": "Câu nào khuyên chúng ta phải biết ơn?",
             "a": [
                 "Có chí thì nên",
                 "Uống nước nhớ nguồn",
@@ -133,19 +124,19 @@ QUESTIONS = {
                 "Tốt gỗ hơn tốt nước sơn"
             ],
             "correct": 1,
-            "explain": "Uống nước nhớ nguồn khuyên con người nhớ ơn cội nguồn."
+            "explain": "Uống nước nhớ nguồn khuyên ta nhớ ơn cội nguồn."
         },
         {
-            "q": "Điền từ còn thiếu: Không thầy đố mày làm ...",
+            "q": "Không thầy đố mày làm ...",
             "a": ["Giàu", "Nên", "Quan", "Khôn"],
             "correct": 3,
-            "explain": "Không thầy đố mày làm nên, đề cao vai trò của người thầy."
+            "explain": "Không thầy đố mày làm nên."
         },
         {
-            "q": "Điền từ còn thiếu: Một mặt người bằng mười mặt ...",
+            "q": "Một mặt người bằng mười mặt ...",
             "a": ["Đất", "Vàng", "Bạc", "Ngọc"],
             "correct": 1,
-            "explain": "Câu tục ngữ đề cao giá trị của con người."
+            "explain": "Câu tục ngữ đề cao giá trị con người."
         }
     ],
 
@@ -159,13 +150,13 @@ QUESTIONS = {
                 "x = 0 hoặc x = 5"
             ],
             "correct": 1,
-            "explain": "Ta có (x - 2)(x - 3) = 0, nên x = 2 hoặc x = 3."
+            "explain": "(x - 2)(x - 3) = 0 nên x = 2 hoặc x = 3."
         },
         {
             "q": "Tính √81.",
             "a": ["7", "8", "9", "10"],
             "correct": 2,
-            "explain": "Vì 9² = 81 nên √81 = 9."
+            "explain": "√81 = 9."
         },
         {
             "q": "Giải phương trình 2x + 6 = 0.",
@@ -177,7 +168,7 @@ QUESTIONS = {
             "q": "Nếu y = 2x + 1, khi x = 3 thì y bằng bao nhiêu?",
             "a": ["5", "6", "7", "8"],
             "correct": 2,
-            "explain": "Thay x = 3 vào y = 2x + 1, ta được y = 7."
+            "explain": "y = 2 × 3 + 1 = 7."
         },
         {
             "q": "Phương trình x² = 16 có nghiệm nào?",
@@ -186,37 +177,37 @@ QUESTIONS = {
             "explain": "Hai nghiệm là x = 4 và x = -4."
         },
         {
-            "q": "Tính giá trị của √25 + √9.",
+            "q": "Tính √25 + √9.",
             "a": ["8", "34", "16", "2"],
             "correct": 0,
-            "explain": "√25 + √9 = 5 + 3 = 8."
+            "explain": "5 + 3 = 8."
         },
         {
             "q": "Đường thẳng y = 3x - 2 có hệ số góc bằng bao nhiêu?",
             "a": ["-2", "2", "3", "-3"],
             "correct": 2,
-            "explain": "Trong y = ax + b, hệ số góc là a = 3."
+            "explain": "Hệ số góc là 3."
         },
         {
-            "q": "Một tam giác vuông có hai cạnh góc vuông dài 3 và 4. Cạnh huyền bằng bao nhiêu?",
+            "q": "Tam giác vuông có hai cạnh góc vuông 3 và 4. Cạnh huyền bằng bao nhiêu?",
             "a": ["5", "6", "7", "8"],
             "correct": 0,
-            "explain": "Theo định lý Pythagore, cạnh huyền = √(3² + 4²) = 5."
+            "explain": "Theo định lý Pythagore, cạnh huyền bằng 5."
         },
         {
             "q": "Giải phương trình x² - 9 = 0.",
             "a": ["x = 3", "x = -3", "x = ±3", "x = 9"],
             "correct": 2,
-            "explain": "(x - 3)(x + 3) = 0 nên x = 3 hoặc x = -3."
+            "explain": "Hai nghiệm là x = 3 và x = -3."
         },
         {
-            "q": "Nếu sin A = 1/2 và góc A nhọn thì A bằng bao nhiêu?",
+            "q": "Nếu sin A = 1/2 và A là góc nhọn thì A bằng bao nhiêu?",
             "a": ["30°", "45°", "60°", "90°"],
             "correct": 0,
-            "explain": "Với góc nhọn A, sin 30° = 1/2 nên A = 30°."
+            "explain": "sin 30° = 1/2."
         },
         {
-            "q": "Giải hệ: x + y = 7 và x - y = 1.",
+            "q": "Giải hệ x + y = 7 và x - y = 1.",
             "a": [
                 "x = 3, y = 4",
                 "x = 4, y = 3",
@@ -224,41 +215,36 @@ QUESTIONS = {
                 "x = 6, y = 1"
             ],
             "correct": 1,
-            "explain": "Cộng hai phương trình được 2x = 8, x = 4 và y = 3."
+            "explain": "Cộng hai phương trình được 2x = 8, nên x = 4, y = 3."
         },
         {
-            "q": "Biệt thức Δ của phương trình x² - 4x + 4 = 0 bằng bao nhiêu?",
+            "q": "Biệt thức Δ của x² - 4x + 4 = 0 bằng bao nhiêu?",
             "a": ["0", "4", "8", "16"],
             "correct": 0,
-            "explain": "Δ = b² - 4ac = 16 - 16 = 0."
+            "explain": "Δ = 16 - 16 = 0."
         },
         {
             "q": "Tính √(49/64).",
             "a": ["7/8", "8/7", "7/64", "49/8"],
             "correct": 0,
-            "explain": "√(49/64) = √49/√64 = 7/8."
+            "explain": "√(49/64) = 7/8."
         },
         {
             "q": "Đồ thị hàm số y = ax² (a khác 0) có hình dạng gì?",
             "a": ["Đường thẳng", "Đường tròn", "Parabol", "Hình chữ nhật"],
             "correct": 2,
-            "explain": "Đồ thị của hàm số y = ax² là một parabol."
+            "explain": "Đồ thị là một parabol."
         },
         {
-            "q": "Nếu một đường tròn có bán kính 3 cm thì đường kính bằng bao nhiêu?",
+            "q": "Đường tròn bán kính 3 cm có đường kính bao nhiêu?",
             "a": ["3 cm", "6 cm", "9 cm", "12 cm"],
             "correct": 1,
-            "explain": "Đường kính bằng hai lần bán kính: d = 2 × 3 = 6 cm."
+            "explain": "Đường kính bằng hai lần bán kính: 6 cm."
         }
     ]
 }
 
-# Chuyển bộ câu hỏi Python sang JavaScript.
-questions_json = json.dumps(QUESTIONS, ensure_ascii=False)
-
-# =====================================================
-# GIAO DIỆN VÀ GAME JAVASCRIPT
-# =====================================================
+QUESTIONS_JSON = json.dumps(QUESTIONS, ensure_ascii=False)
 
 GAME_HTML = r"""
 <!DOCTYPE html>
@@ -380,6 +366,12 @@ button:disabled {
 .primary {
     color: #160d20;
     background: linear-gradient(120deg, #f7b928, #ff7a18);
+    border: none;
+}
+
+#ufoButton {
+    background: linear-gradient(120deg, #00d4ff, #3975ff);
+    color: #07132b;
     border: none;
 }
 
@@ -515,7 +507,7 @@ button:disabled {
     font-size: 53px;
     z-index: 20;
     filter: drop-shadow(0 0 10px #6deaff);
-    transition: left 2s ease, top 1.4s ease;
+    transition: left 0.8s ease, top 0.8s ease;
     pointer-events: none;
 }
 
@@ -530,6 +522,7 @@ button:disabled {
     background: linear-gradient(#6df9ff99, #6df9ff20, transparent);
     clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
     animation: pulse 0.5s infinite alternate;
+    pointer-events: none;
 }
 
 @keyframes pulse {
@@ -537,9 +530,15 @@ button:disabled {
     to { opacity: 1; }
 }
 
+#peopleLayer {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+}
+
 .person {
     position: absolute;
-    z-index: 10;
     width: 34px;
     height: 100px;
     transform-origin: center bottom;
@@ -652,7 +651,6 @@ button:disabled {
 
 .person.captured {
     animation: abduct 1.8s forwards;
-    pointer-events: none;
 }
 
 @keyframes abduct {
@@ -692,15 +690,15 @@ button:disabled {
 #quiz {
     display: none;
     position: absolute;
-    z-index: 50;
+    z-index: 1000;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
     width: min(520px, 94%);
-    max-height: 92%;
+    max-height: 85%;
     overflow-y: auto;
-    padding: 18px;
-    background: #10142af5;
+    padding: 20px;
+    background: #10142af7;
     border: 2px solid #ffe66d;
     border-radius: 17px;
     box-shadow: 0 0 30px #55eaff77;
@@ -751,6 +749,7 @@ button:disabled {
     #ufo { font-size: 42px; width: 75px; }
     #quiz { padding: 12px; }
     #question { font-size: 15px; }
+    .answers { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -760,7 +759,7 @@ button:disabled {
 
     <div class="header">
         <h1>🛸 UFO HACK NÃO 👽</h1>
-        <p>Thành phố ban đêm — UFO săn người — thử thách trí tuệ!</p>
+        <p>Thành phố ban đêm — bạn điều khiển UFO — thử thách trí tuệ!</p>
     </div>
 
     <div class="stats">
@@ -799,6 +798,7 @@ button:disabled {
 
         <button id="renameButton">✏️ Đổi tên</button>
         <button id="startButton" class="primary">🔊 BẮT ĐẦU GAME</button>
+        <button id="ufoButton">🛸 UFO BẮT NGƯỜI</button>
         <button id="resetButton">🔄 Chơi lại</button>
 
         <div class="control" style="max-width:180px">
@@ -812,16 +812,14 @@ button:disabled {
         <div class="sky"></div>
         <div class="moon"></div>
         <div class="buildings" id="buildings"></div>
-
         <div class="lamp" style="left:8%"></div>
         <div class="lamp" style="left:76%"></div>
-
         <div class="road"></div>
         <div class="sidewalk"></div>
         <div class="road-line"></div>
 
         <div id="ufo">🛸<div class="beam" id="beam"></div></div>
-        <div id="message">🌃 Đêm xuống... UFO đang tuần tra thành phố!</div>
+        <div id="message">🌃 Đêm xuống... Hãy bắt đầu trò chơi!</div>
         <div id="peopleLayer"></div>
 
         <div id="quiz">
@@ -834,14 +832,13 @@ button:disabled {
     </div>
 
     <div class="footer">
-        Chọn mức độ trước khi chơi. Bấm BẮT ĐẦU GAME để kích hoạt nhạc.
-        UFO sẽ tự động bắt người và đưa ra câu hỏi.
+        Chọn mức độ, bấm BẮT ĐẦU GAME, sau đó tự bấm UFO BẮT NGƯỜI
+        mỗi khi bạn muốn bắt người tiếp theo.
     </div>
 </div>
 
 <script>
 const QUESTION_BANK = __QUESTIONS__;
-
 const $ = id => document.getElementById(id);
 
 const peopleLayer = $("peopleLayer");
@@ -857,7 +854,7 @@ let round = 0;
 let currentTarget = null;
 let gameStarted = false;
 let quizOpen = false;
-let nextTimer = null;
+let abductionInProgress = false;
 let lastQuestion = null;
 
 const shirts = [
@@ -910,7 +907,7 @@ function createPerson(index) {
     const person = {
         id: index + 1,
         name: "Người " + (index + 1),
-        el,
+        el: el,
         x: 2 + Math.random() * 90,
         y: 58 + Math.random() * 20,
         speed: 0.012 + Math.random() * 0.02,
@@ -953,10 +950,8 @@ function createPerson(index) {
     `;
 
     el.querySelector(".nameTag").textContent = person.name;
-
     peopleLayer.appendChild(el);
     people.push(person);
-
     positionPerson(person);
 
     return person;
@@ -976,7 +971,6 @@ function positionPerson(person) {
 function refreshRenameSelect() {
     const select = $("renameSelect");
     const previous = select.value;
-
     select.innerHTML = "";
 
     people.filter(p => p.alive).forEach(person => {
@@ -994,18 +988,14 @@ function refreshRenameSelect() {
 function updateStats() {
     $("score").textContent = score;
     $("saved").textContent = saved;
-
-    $("remaining").textContent =
-        people.filter(p => p.alive).length;
-
+    $("remaining").textContent = people.filter(p => p.alive).length;
     $("round").textContent = round;
 }
 
 function createCity(count) {
-    clearTimeout(nextTimer);
-
     gameStarted = false;
     quizOpen = false;
+    abductionInProgress = false;
     currentTarget = null;
 
     peopleLayer.innerHTML = "";
@@ -1017,6 +1007,7 @@ function createCity(count) {
     score = 0;
     saved = 0;
     round = 0;
+    lastQuestion = null;
 
     for (let i = 0; i < count; i++) {
         createPerson(i);
@@ -1026,8 +1017,9 @@ function createCity(count) {
     updateStats();
 
     $("startButton").textContent = "🔊 BẮT ĐẦU GAME";
+    $("ufoButton").disabled = true;
 
-    setMessage("🌃 Đêm xuống... UFO đang tuần tra thành phố!");
+    setMessage("🌃 Đêm xuống... Hãy bấm BẮT ĐẦU GAME!");
     moveUFO();
 }
 
@@ -1058,51 +1050,40 @@ function animatePeople() {
     requestAnimationFrame(animatePeople);
 }
 
-function scheduleAbduction() {
-    clearTimeout(nextTimer);
-
-    if (!gameStarted || quizOpen) return;
+function beginAbduction() {
+    if (!gameStarted || quizOpen || abductionInProgress) {
+        return;
+    }
 
     const living = people.filter(p => p.alive && !p.captured);
 
     if (living.length === 0) {
         gameStarted = false;
-        $("startButton").textContent = "🔊 BẮT ĐẦU GAME";
-        setMessage("👽 UFO đã bắt hết mọi người! Hãy bấm CHƠI LẠI.");
+        $("ufoButton").disabled = true;
+        setMessage("👽 Hết người rồi! Hãy bấm CHƠI LẠI.");
         return;
     }
 
-    nextTimer = setTimeout(() => {
-        if (gameStarted && !quizOpen) {
-            beginAbduction();
-        }
-    }, 5000 + Math.random() * 3500);
-}
+    abductionInProgress = true;
+    $("ufoButton").disabled = true;
 
-function beginAbduction() {
-    const living = people.filter(p => p.alive && !p.captured);
-
-    if (living.length === 0) {
-        scheduleAbduction();
-        return;
-    }
-
-    currentTarget = living[Math.floor(Math.random() * living.length)];
-    const target = currentTarget;
-
+    const target = living[Math.floor(Math.random() * living.length)];
+    currentTarget = target;
     round++;
 
     ufo.style.left = Math.max(0, Math.min(85, target.x - 3)) + "%";
     ufo.style.top = "7%";
 
     beam.style.display = "block";
-
     setMessage("🛸 UFO đang bắt " + target.name + "!");
-
     playSFX(660, 0.3);
 
     setTimeout(() => {
-        if (!target.alive) return;
+        if (!target.alive) {
+            abductionInProgress = false;
+            beam.style.display = "none";
+            return;
+        }
 
         target.captured = true;
         target.el.classList.add("captured");
@@ -1113,7 +1094,6 @@ function beginAbduction() {
             target.el.style.display = "none";
 
             beam.style.display = "none";
-
             updateStats();
             refreshRenameSelect();
 
@@ -1125,24 +1105,19 @@ function beginAbduction() {
 function showQuestion(target) {
     gameStarted = false;
     quizOpen = true;
-
-    clearTimeout(nextTimer);
+    $("ufoButton").disabled = true;
 
     const level = $("difficulty").value;
     const list = QUESTION_BANK[level];
 
-    let question;
-
-    // Cố gắng tránh hỏi lại câu ngay trước đó.
     const available = list.filter(q => q.q !== lastQuestion);
     const pool = available.length ? available : list;
+    const question = pool[Math.floor(Math.random() * pool.length)];
 
-    question = pool[Math.floor(Math.random() * pool.length)];
     lastQuestion = question.q;
 
     $("targetText").textContent =
-        "🛸 UFO đã bắt " + target.name +
-        "! Mức độ: " + level;
+        "🛸 UFO đã bắt " + target.name + "! Mức độ: " + level;
 
     $("question").textContent = question.q;
     $("quizResult").textContent = "";
@@ -1186,19 +1161,23 @@ function showQuestion(target) {
             next.addEventListener("click", () => {
                 quiz.style.display = "none";
                 quizOpen = false;
+                abductionInProgress = false;
 
                 if (people.every(p => !p.alive)) {
                     gameStarted = false;
                     $("startButton").textContent = "🔊 BẮT ĐẦU GAME";
+                    $("ufoButton").disabled = true;
                     setMessage("👽 Hết người rồi! Hãy bấm CHƠI LẠI.");
                     return;
                 }
 
                 gameStarted = true;
                 $("startButton").textContent = "⏸ TẠM DỪNG GAME";
+                $("ufoButton").disabled = false;
 
-                setMessage("🌃 UFO tiếp tục tuần tra thành phố!");
-                scheduleAbduction();
+                setMessage(
+                    "🌃 Hãy bấm 🛸 UFO BẮT NGƯỜI khi bạn muốn bắt tiếp!"
+                );
             });
 
             answerBox.appendChild(next);
@@ -1257,16 +1236,15 @@ $("difficulty").addEventListener("change", () => {
 $("startButton").addEventListener("click", () => {
     initAudio();
 
-    if (quizOpen) {
-        setMessage("🧠 Hãy trả lời câu hỏi trước!");
+    if (quizOpen || abductionInProgress) {
+        setMessage("🧠 Hãy hoàn thành lượt bắt người hiện tại trước!");
         return;
     }
 
     if (gameStarted) {
         gameStarted = false;
-        clearTimeout(nextTimer);
-
         $("startButton").textContent = "▶ TIẾP TỤC GAME";
+        $("ufoButton").disabled = true;
         setMessage("⏸ Game đang tạm dừng.");
     } else {
         if (people.every(p => !p.alive)) {
@@ -1275,15 +1253,32 @@ $("startButton").addEventListener("click", () => {
 
         gameStarted = true;
         $("startButton").textContent = "⏸ TẠM DỪNG GAME";
+        $("ufoButton").disabled = false;
 
-        setMessage("🛸 UFO đã xuất hiện! Hãy sẵn sàng!");
-        scheduleAbduction();
+        setMessage(
+            "🛸 Game bắt đầu! Bạn hãy tự bấm nút UFO BẮT NGƯỜI."
+        );
     }
 });
 
-// =====================================================
-// ÂM THANH ĐIỆN TỬ TỰ TẠO
-// =====================================================
+$("ufoButton").addEventListener("click", () => {
+    if (!gameStarted) {
+        setMessage("▶ Hãy bấm BẮT ĐẦU GAME trước!");
+        return;
+    }
+
+    if (quizOpen) {
+        setMessage("🧠 Hãy trả lời câu hỏi trước!");
+        return;
+    }
+
+    if (abductionInProgress) {
+        setMessage("🛸 UFO đang bắt người!");
+        return;
+    }
+
+    beginAbduction();
+});
 
 let audioContext = null;
 let masterGain = null;
@@ -1314,7 +1309,7 @@ function initAudio() {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
 
     if (!AudioCtx) {
-        setMessage("Trình duyệt không hỗ trợ âm thanh Web Audio.");
+        setMessage("Trình duyệt không hỗ trợ âm thanh.");
         return;
     }
 
@@ -1384,58 +1379,42 @@ function playSFX(frequency = 600, duration = 0.3) {
     tone(frequency * 1.5, duration * 0.7, "triangle", 0.1);
 }
 
+$("volume").addEventListener("input", setVolume);
+
 createBuildings();
 createCity(12);
-moveUFO();
 animatePeople();
 setVolume();
-
-setInterval(() => {
-    if (!gameStarted && !quizOpen) {
-        moveUFO();
-    }
-}, 4500);
 </script>
 </body>
 </html>
 """
 
-# Chèn bộ câu hỏi vào HTML.
-GAME_HTML = GAME_HTML.replace("__QUESTIONS__", questions_json)
+GAME_HTML = GAME_HTML.replace("__QUESTIONS__", QUESTIONS_JSON)
 
-# =====================================================
-# HIỂN THỊ GAME TRONG STREAMLIT
-# =====================================================
-
-st.markdown(
-    """
-    <style>
-    .stApp {
-        background-color: #080d1b;
-    }
-
-    [data-testid="stHeader"] {
-        background: transparent;
-    }
-
-    h1 {
-        color: #ffe66d !important;
-        text-align: center;
-    }
-
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown("""
+<style>
+.stApp {
+    background-color: #080d1b;
+}
+[data-testid="stHeader"] {
+    background: transparent;
+}
+h1 {
+    color: #ffe66d !important;
+    text-align: center;
+}
+</style>
+""", unsafe_allow_html=True)
 
 st.title("🛸 UFO HACK NÃO")
 st.caption(
-    "Chọn mức độ câu hỏi, quan sát UFO bắt người "
-    "và thử thách kiến thức của bạn!"
+    "Chọn mức độ câu hỏi, sau đó tự bấm nút UFO BẮT NGƯỜI "
+    "để chọn ngẫu nhiên một nhân vật."
 )
 
 components.html(
     GAME_HTML,
-    height=1100,
+    height=1200,
     scrolling=True
 )
